@@ -1,17 +1,26 @@
 
 import { useState } from 'react';
-import { BookOpen, Quote, ArrowDown } from 'lucide-react';
+import { BookOpen, MessageCircle, Users, ExternalLink, ChevronDown, ChevronUp, Quote } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import BookSummary from '@/components/BookSummary';
 import ChatInterface from '@/components/ChatInterface';
 import ChapterBreakdown from '@/components/ChapterBreakdown';
 import References from '@/components/References';
-import FeedbackForm from '@/components/FeedbackForm';
-import FloatingParticles from '@/components/FloatingParticles';
-import SimpleNavigation from '@/components/SimpleNavigation';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState<string>('summary');
+
+  const navigationItems = [
+    { id: 'summary', label: 'Interactive Summary', icon: BookOpen },
+    { id: 'chat', label: 'AI Discussion', icon: MessageCircle },
+    { id: 'chapters', label: 'Chapter Analysis', icon: Users },
+    { id: 'references', label: 'Further Reading', icon: ExternalLink },
+  ];
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -21,8 +30,6 @@ const Index = () => {
         return <ChatInterface />;
       case 'chapters':
         return <ChapterBreakdown />;
-      case 'feedback':
-        return <FeedbackForm />;
       case 'references':
         return <References />;
       default:
@@ -31,102 +38,101 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50 font-inter relative overflow-x-hidden">
-      <FloatingParticles />
-      
-      {/* Simple Top Navigation */}
-      <SimpleNavigation activeSection={activeSection} onSectionChange={setActiveSection} />
-
-      {/* Hero Section - Full viewport height with top padding for fixed nav */}
-      <section className="min-h-screen flex items-center justify-center relative pt-20">
-        <div className="container mx-auto px-6 py-16 max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            
-            {/* Left Column - Content */}
-            <div className="space-y-8 animate-fade-in-up">
-              <div className="space-y-6">
-                <Badge variant="secondary" className="bg-blue-100/80 text-blue-800 backdrop-blur-sm px-4 py-2 text-sm font-medium">
-                  #1 NY Times Bestseller
-                </Badge>
-                
-                <h1 className="font-playfair text-5xl lg:text-7xl font-bold text-slate-800 leading-tight">
-                  The Technological
-                  <span className="text-blue-600 block">Republic</span>
-                </h1>
-                
-                <h2 className="font-playfair text-2xl lg:text-3xl text-slate-600 italic font-light leading-relaxed">
-                  Hard Power, Soft Belief, and the Future of the West
-                </h2>
-                
-                <div className="flex flex-wrap items-center gap-2 text-lg text-slate-700">
-                  <span className="font-medium">by</span>
-                  <span className="font-semibold">Alexander C. Karp</span>
-                  <span className="text-slate-400">&</span>
-                  <span className="font-semibold">Nicholas W. Zamiska</span>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
               </div>
-
-              <div className="bg-white/40 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                <Quote className="w-8 h-8 text-blue-500 mb-4" />
-                <blockquote className="font-playfair text-xl text-slate-700 italic leading-relaxed mb-4">
-                  "No less ambitious than a new treatise in political theory."
-                </blockquote>
-                <cite className="text-slate-600 font-medium">—The Wall Street Journal</cite>
-              </div>
-
-              <p className="text-lg text-slate-600 leading-relaxed font-light max-w-xl">
-                Explore an interactive analysis of this groundbreaking work on technology, power, 
-                and Western civilization's future in an increasingly complex global landscape.
-              </p>
-            </div>
-
-            {/* Right Column - Book Visual */}
-            <div className="relative lg:pl-16">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl"></div>
-                <div className="relative bg-white/60 backdrop-blur-lg rounded-3xl p-12 border border-white/30 transform group-hover:scale-105 transition-transform duration-500">
-                  <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                    <BookOpen className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-playfair text-2xl font-bold text-slate-800 mb-2">Interactive Analysis</h3>
-                    <p className="text-slate-600 font-light">Dive deep into Karp's vision for the future</p>
-                  </div>
-                </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-800">The Technological Republic</h1>
+                <p className="text-sm text-slate-600">Interactive Book Analysis</p>
               </div>
             </div>
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+              #1 NY Times Bestseller
+            </Badge>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-16 px-6">
+        <div className="container mx-auto max-w-4xl text-center">
+          <div className="mb-8">
+            <Quote className="w-8 h-8 text-blue-500 mx-auto mb-4" />
+            <blockquote className="text-xl text-slate-700 italic mb-4">
+              "No less ambitious than a new treatise in political theory."
+            </blockquote>
+            <cite className="text-slate-500">—The Wall Street Journal</cite>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+            The Technological Republic
+          </h2>
+          <h3 className="text-2xl md:text-3xl text-slate-600 mb-8 italic">
+            Hard Power, Soft Belief, and the Future of the West
+          </h3>
+          
+          <div className="flex items-center justify-center space-x-2 mb-8">
+            <span className="text-lg text-slate-700">by</span>
+            <span className="text-lg font-semibold text-slate-800">Alexander C. Karp</span>
+            <span className="text-slate-500">and</span>
+            <span className="text-lg font-semibold text-slate-800">Nicholas W. Zamiska</span>
           </div>
 
-          {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-            <ArrowDown className="w-6 h-6 text-slate-400" />
-          </div>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Explore an interactive analysis of this groundbreaking work on technology, power, 
+            and Western civilization's future in an increasingly complex global landscape.
+          </p>
         </div>
       </section>
 
-      {/* Main Content Section */}
-      <section className="relative">
-        <div className="container mx-auto px-6 py-16 max-w-6xl">
-          <div className="bg-white/60 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl overflow-hidden">
-            <div className="p-8 lg:p-12">
-              {renderActiveSection()}
-            </div>
+      {/* Navigation */}
+      <nav className="px-6 mb-8">
+        <div className="container mx-auto max-w-4xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.id}
+                  variant={activeSection === item.id ? 'default' : 'outline'}
+                  className={`h-auto p-4 flex flex-col items-center space-y-2 ${
+                    activeSection === item.id 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                      : 'border-blue-200 hover:bg-blue-50'
+                  }`}
+                  onClick={() => setActiveSection(item.id)}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-sm font-medium text-center">{item.label}</span>
+                </Button>
+              );
+            })}
           </div>
         </div>
-      </section>
+      </nav>
+
+      {/* Main Content */}
+      <main className="px-6 pb-16">
+        <div className="container mx-auto max-w-4xl">
+          {renderActiveSection()}
+        </div>
+      </main>
 
       {/* Footer */}
-      <footer className="relative bg-slate-900/95 backdrop-blur-lg text-white py-12 px-6 mt-24">
+      <footer className="bg-slate-800 text-white py-8 px-6">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="space-y-4">
-            <h3 className="font-playfair text-2xl font-bold">The Technological Republic</h3>
-            <p className="text-slate-300 font-light">
-              Interactive analysis tool • Built for deep exploration
-            </p>
-            <p className="text-slate-400 text-sm">
-              Ready for deployment on Netlify
-            </p>
-          </div>
+          <p className="text-slate-300">
+            Interactive analysis tool for "The Technological Republic" • Built for deep exploration
+          </p>
+          <p className="text-slate-400 text-sm mt-2">
+            Ready for deployment on Netlify
+          </p>
         </div>
       </footer>
     </div>
