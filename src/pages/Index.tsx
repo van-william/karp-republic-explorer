@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { BookOpen, MessageCircle, Users, ExternalLink, ChevronDown, ChevronUp, Quote } from 'lucide-react';
+import { BookOpen, MessageCircle, Users, ExternalLink, ChevronDown, ChevronUp, Quote, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import BookSummary from '@/components/BookSummary';
 import ChatInterface from '@/components/ChatInterface';
 import ChapterBreakdown from '@/components/ChapterBreakdown';
 import References from '@/components/References';
+import FeedbackForm from '@/components/FeedbackForm';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState<string>('summary');
@@ -19,6 +20,7 @@ const Index = () => {
     { id: 'summary', label: 'Interactive Summary', icon: BookOpen },
     { id: 'chat', label: 'AI Discussion', icon: MessageCircle },
     { id: 'chapters', label: 'Chapter Analysis', icon: Users },
+    { id: 'feedback', label: 'Share Feedback', icon: MessageSquare },
     { id: 'references', label: 'Further Reading', icon: ExternalLink },
   ];
 
@@ -30,6 +32,8 @@ const Index = () => {
         return <ChatInterface />;
       case 'chapters':
         return <ChapterBreakdown />;
+      case 'feedback':
+        return <FeedbackForm />;
       case 'references':
         return <References />;
       default:
@@ -94,7 +98,7 @@ const Index = () => {
       {/* Navigation */}
       <nav className="px-6 mb-8">
         <div className="container mx-auto max-w-4xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
