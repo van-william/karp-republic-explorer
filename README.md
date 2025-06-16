@@ -1,4 +1,19 @@
-# Welcome to your Lovable project
+# Technological Republic Explorer
+
+An interactive web application exploring Alexander C. Karp and Nicholas W. Zamiska's "Technological Republic: Hard Power, Soft Belief, and the Future of the West." This modern, single-page application provides an engaging platform for understanding the complex themes of geopolitical strategy, technology's role in power dynamics, and Western civilization's trajectory.
+
+## About the Application
+
+This application serves as a digital companion to the book, offering:
+
+- Interactive book summary with expandable sections and tooltips
+- AI-powered chat interface for book discussions
+- Chapter-by-chapter breakdowns
+- Further reading and references section
+- Author information and context
+- Responsive design optimized for all devices
+
+The design draws inspiration from modern political think-tank websites and academic platforms, featuring a sophisticated blue theme that reflects the serious nature of the subject matter.
 
 ## Project info
 
