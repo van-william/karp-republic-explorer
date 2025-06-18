@@ -1,3 +1,6 @@
+// Developer-only backend selector
+// Set to 'huggingface' or 'openai' to choose the backend for chat
+const CHAT_BACKEND: 'huggingface' | 'openai' = 'huggingface';
 
 import { useState } from 'react';
 import { Send, Bot, User, MessageCircle, Info } from 'lucide-react';
@@ -24,6 +27,7 @@ const ChatInterface = () => {
     }
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const suggestedQuestions = [
     "What is Karp's main argument about technological power?",
@@ -33,8 +37,48 @@ const ChatInterface = () => {
     "What role does data play in modern geopolitics?"
   ];
 
-  const handleSendMessage = () => {
+  // Helper to call the backend (developer-only, not visible to end users)
+  async function fetchBotResponse(userInput: string): Promise<string> {
+    if (CHAT_BACKEND === 'huggingface') {
+      // Example: call your local Hugging Face backend
+      try {
+        const res = await fetch('/api/huggingface-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userInput })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.response || '[No response from Hugging Face backend]';
+        }
+        return '[Error from Hugging Face backend]';
+      } catch (e) {
+        return '[Failed to reach Hugging Face backend]';
+      }
+    } else if (CHAT_BACKEND === 'openai') {
+      // Example: call your OpenAI REST API backend
+      try {
+        const res = await fetch('/api/openai-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userInput })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.response || '[No response from OpenAI backend]';
+        }
+        return '[Error from OpenAI backend]';
+      } catch (e) {
+        return '[Failed to reach OpenAI backend]';
+      }
+    }
+    // Fallback placeholder
+    return 'This is a placeholder response. Once you integrate the PDF and book materials, I\'ll be able to provide detailed analysis and discussion based on the actual text. For now, I can help structure your questions and thoughts about the book.';
+  }
+
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
+    setLoading(true);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -43,15 +87,19 @@ const ChatInterface = () => {
       timestamp: new Date()
     };
 
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+
+    // Get bot response (from backend or placeholder)
+    const botContent = await fetchBotResponse(userMessage.content);
     const botResponse: Message = {
       id: (Date.now() + 1).toString(),
-      content: 'This is a placeholder response. Once you integrate the PDF and book materials, I\'ll be able to provide detailed analysis and discussion based on the actual text. For now, I can help structure your questions and thoughts about the book.',
+      content: botContent,
       sender: 'bot',
       timestamp: new Date()
     };
-
-    setMessages(prev => [...prev, userMessage, botResponse]);
-    setInputValue('');
+    setMessages(prev => [...prev, botResponse]);
+    setLoading(false);
   };
 
   const handleSuggestedQuestion = (question: string) => {
@@ -149,9 +197,10 @@ const ChatInterface = () => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask about the book's themes, arguments, or implications..."
               className="flex-1 border-blue-200 focus:border-blue-400"
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyPress={(e) => e.key === 'Enter' && !loading && handleSendMessage()}
+              disabled={loading}
             />
-            <Button onClick={handleSendMessage} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSendMessage} className="bg-blue-600 hover:bg-blue-700" disabled={loading}>
               <Send className="w-4 h-4" />
             </Button>
           </div>
