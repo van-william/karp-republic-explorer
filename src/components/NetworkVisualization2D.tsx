@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,8 +21,8 @@ interface VizNode {
 }
 
 interface VizLink {
-  source: VizNode;
-  target: VizNode;
+  source: string | VizNode;
+  target: string | VizNode;
   type: string;
   description?: string;
 }
@@ -57,6 +57,25 @@ const NetworkVisualization2D = ({ className }: NetworkVisualization2DProps) => {
     setSelectedLink(null);
   }, []);
 
+  // Auto-center and fit the graph when component mounts
+  useEffect(() => {
+    if (graphRef.current) {
+      // Wait a bit for the graph to initialize
+      setTimeout(() => {
+        try {
+          if (graphRef.current.zoomToFit) {
+            // Add 80px padding for a better fit
+            graphRef.current.zoomToFit(200, 80);
+          } else if (graphRef.current.fitView) {
+            graphRef.current.fitView(600);
+          }
+        } catch (error) {
+          console.error('Error centering 2D graph:', error);
+        }
+      }, 100);
+    }
+  }, []);
+
   // Convert data for react-force-graph
   const graphDataForViz: VizGraphData = {
     nodes: conceptData.nodes.map(node => ({
@@ -67,26 +86,22 @@ const NetworkVisualization2D = ({ className }: NetworkVisualization2DProps) => {
       color: node.color,
       size: node.size
     })),
-    links: conceptData.relationships.map(rel => ({
-      source: {
-        id: rel.source,
-        label: conceptData.nodes.find(node => node.id === rel.source)?.label || '',
-        type: conceptData.nodes.find(node => node.id === rel.source)?.type || '',
-        description: conceptData.nodes.find(node => node.id === rel.source)?.description,
-        color: conceptData.nodes.find(node => node.id === rel.source)?.color,
-        size: conceptData.nodes.find(node => node.id === rel.source)?.size
-      },
-      target: {
-        id: rel.target,
-        label: conceptData.nodes.find(node => node.id === rel.target)?.label || '',
-        type: conceptData.nodes.find(node => node.id === rel.target)?.type || '',
-        description: conceptData.nodes.find(node => node.id === rel.target)?.description,
-        color: conceptData.nodes.find(node => node.id === rel.target)?.color,
-        size: conceptData.nodes.find(node => node.id === rel.target)?.size
-      },
-      type: rel.type,
-      description: rel.description
-    }))
+    links: conceptData.relationships.map(rel => {
+      const sourceNode = conceptData.nodes.find(node => node.id === rel.source);
+      const targetNode = conceptData.nodes.find(node => node.id === rel.target);
+      
+      if (!sourceNode || !targetNode) {
+        console.warn(`Missing node for relationship: ${rel.source} -> ${rel.target}`);
+        return null;
+      }
+      
+      return {
+        source: rel.source, // Use the node ID as string reference
+        target: rel.target, // Use the node ID as string reference
+        type: rel.type,
+        description: rel.description
+      };
+    }).filter(Boolean) as VizLink[] // Filter out null values
   };
 
   return (
@@ -138,7 +153,13 @@ const NetworkVisualization2D = ({ className }: NetworkVisualization2DProps) => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg">
-                    {selectedLink.source.label} → {selectedLink.target.label}
+                    {typeof selectedLink.source === 'string' 
+                      ? conceptData.nodes.find(n => n.id === selectedLink.source)?.label 
+                      : selectedLink.source.label} 
+                    → 
+                    {typeof selectedLink.target === 'string' 
+                      ? conceptData.nodes.find(n => n.id === selectedLink.target)?.label 
+                      : selectedLink.target.label}
                   </CardTitle>
                   <Badge variant="outline" className="mt-1">
                     {selectedLink.type}
@@ -160,8 +181,6 @@ const NetworkVisualization2D = ({ className }: NetworkVisualization2DProps) => {
         <AlertDescription className="text-blue-800">
           <strong>How to explore:</strong> Click and drag nodes to explore. Click on a node or connection to see details. 
           The network shows how concepts from "The Technological Republic" relate to each other.
-          <br /><br />
-          <strong>To modify:</strong> Edit the data in <code>src/lib/networkDiagramData.ts</code>
         </AlertDescription>
       </Alert>
     </div>
