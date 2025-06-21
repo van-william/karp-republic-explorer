@@ -93,7 +93,7 @@ const AudioSummary = () => {
               onError={handleError}
               className="hidden"
             >
-              <source src="/audio/The Technological Republic.wav" type="audio/wav" />
+              <source src="/audio/The Technological Republic.mp3" type="audio/mpeg" />
               Your browser does not support the audio element.
             </audio>
             
