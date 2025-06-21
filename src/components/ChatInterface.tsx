@@ -1,7 +1,3 @@
-// Developer-only backend selector
-// Set to 'huggingface' or 'openai' to choose the backend for chat
-const CHAT_BACKEND: 'huggingface' | 'openai' = 'huggingface';
-
 import { useState } from 'react';
 import { Send, Bot, User, MessageCircle, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { generateResponse } from '@/lib/geminiApi';
+import { getRelevantContext } from '@/lib/contextLoader';
 
 interface Message {
   id: string;
@@ -21,7 +19,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! I\'m your AI assistant for "The Technological Republic". I can discuss key themes, analyze arguments, and help you explore the book\'s concepts. What would you like to explore?',
+      content: 'Hello! I\'m your AI assistant for "The Technological Republic" by Alex Karp. I can discuss key themes, analyze arguments, and help you explore the book\'s concepts using context from your notes and materials. What would you like to explore?',
       sender: 'bot',
       timestamp: new Date()
     }
@@ -37,45 +35,6 @@ const ChatInterface = () => {
     "What role does data play in modern geopolitics?"
   ];
 
-  // Helper to call the backend (developer-only, not visible to end users)
-  async function fetchBotResponse(userInput: string): Promise<string> {
-    if (CHAT_BACKEND === 'huggingface') {
-      // Example: call your local Hugging Face backend
-      try {
-        const res = await fetch('/api/huggingface-chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userInput })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          return data.response || '[No response from Hugging Face backend]';
-        }
-        return '[Error from Hugging Face backend]';
-      } catch (e) {
-        return '[Failed to reach Hugging Face backend]';
-      }
-    } else if (CHAT_BACKEND === 'openai') {
-      // Example: call your OpenAI REST API backend
-      try {
-        const res = await fetch('/api/openai-chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userInput })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          return data.response || '[No response from OpenAI backend]';
-        }
-        return '[Error from OpenAI backend]';
-      } catch (e) {
-        return '[Failed to reach OpenAI backend]';
-      }
-    }
-    // Fallback placeholder
-    return 'This is a placeholder response. Once you integrate the PDF and book materials, I\'ll be able to provide detailed analysis and discussion based on the actual text. For now, I can help structure your questions and thoughts about the book.';
-  }
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     setLoading(true);
@@ -90,16 +49,35 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
 
-    // Get bot response (from backend or placeholder)
-    const botContent = await fetchBotResponse(userMessage.content);
-    const botResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      content: botContent,
-      sender: 'bot',
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, botResponse]);
-    setLoading(false);
+    try {
+      // Get relevant context for the user's question
+      const context = getRelevantContext(userMessage.content);
+      
+      // Generate response using Gemini API
+      const botContent = await generateResponse(userMessage.content, context);
+      
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: botContent,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Error generating response:', error);
+      
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'I apologize, but I encountered an error while processing your request. Please check your API key configuration and try again.',
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSuggestedQuestion = (question: string) => {
@@ -111,17 +89,17 @@ const ChatInterface = () => {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-slate-800 mb-4">AI Discussion Interface</h2>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-          Engage in thoughtful conversation about the book's themes and arguments
+          Engage in thoughtful conversation about the book's themes and arguments with context-aware AI
         </p>
       </div>
 
-      <Alert className="border-blue-200 bg-blue-50">
+      {/* <Alert className="border-blue-200 bg-blue-50">
         <Info className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          This chat interface is ready for integration with your PDF and book materials. 
-          Currently showing placeholder responses for demonstration.
+          This chat interface uses Gemini AI and can incorporate context from your markdown files in the `/context` directory. 
+          Add your book notes and materials there for more informed discussions.
         </AlertDescription>
-      </Alert>
+      </Alert> */}
 
       <Card className="border-blue-200">
         <CardHeader>
@@ -132,11 +110,11 @@ const ChatInterface = () => {
               </div>
               <div>
                 <CardTitle>Book Discussion</CardTitle>
-                <CardDescription>AI-powered analysis and conversation</CardDescription>
+                <CardDescription>AI-powered analysis with contextual knowledge</CardDescription>
               </div>
             </div>
             <Badge variant="secondary" className="bg-green-100 text-green-800">
-              Ready for Integration
+              Gemini AI + Context
             </Badge>
           </div>
         </CardHeader>
@@ -170,6 +148,21 @@ const ChatInterface = () => {
                 </div>
               </div>
             ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-slate-100 text-slate-800 max-w-xs lg:max-w-md px-4 py-2 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Bot className="w-4 h-4" />
+                    <span className="text-xs opacity-75">Thinking...</span>
+                  </div>
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Suggested Questions */}

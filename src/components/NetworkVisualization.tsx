@@ -1,0 +1,133 @@
+import { useState, useCallback, useRef } from 'react';
+import ForceGraph3D from 'react-force-graph-3d';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
+import { conceptData, GraphNode, GraphData } from '@/lib/networkDiagramData';
+
+interface NetworkVisualizationProps {
+  className?: string;
+}
+
+const NetworkVisualization = ({ className }: NetworkVisualizationProps) => {
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [selectedLink, setSelectedLink] = useState<any>(null);
+  
+  const graphRef = useRef<any>();
+
+  // Handle node click
+  const handleNodeClick = useCallback((node: any) => {
+    setSelectedNode(node);
+    setSelectedLink(null);
+  }, []);
+
+  // Handle link click
+  const handleLinkClick = useCallback((link: any) => {
+    setSelectedLink(link);
+    setSelectedNode(null);
+  }, []);
+
+  // Handle background click
+  const handleBackgroundClick = useCallback(() => {
+    setSelectedNode(null);
+    setSelectedLink(null);
+  }, []);
+
+  // Convert data for react-force-graph
+  const graphDataForViz = {
+    nodes: conceptData.nodes.map(node => ({
+      id: node.id,
+      label: node.label,
+      type: node.type,
+      description: node.description,
+      color: node.color,
+      size: node.size
+    })),
+    links: conceptData.relationships.map(rel => ({
+      source: rel.source,
+      target: rel.target,
+      type: rel.type,
+      description: rel.description
+    }))
+  };
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      <div className="space-y-4">
+        <div className="h-96 border border-slate-200 rounded-lg overflow-hidden">
+          <ForceGraph3D
+            ref={graphRef}
+            graphData={graphDataForViz}
+            nodeLabel="label"
+            nodeColor="color"
+            nodeRelSize={6}
+            linkLabel="type"
+            linkColor={() => '#999'}
+            linkWidth={2}
+            onNodeClick={handleNodeClick}
+            onLinkClick={handleLinkClick}
+            onBackgroundClick={handleBackgroundClick}
+            backgroundColor="#ffffff"
+            showNavInfo={true}
+            enableNodeDrag={true}
+          />
+        </div>
+        
+        {selectedNode && (
+          <Card className="border-slate-200">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">{selectedNode.label}</CardTitle>
+                  <Badge variant="outline" className="mt-1">
+                    {selectedNode.type}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {selectedNode.description && (
+                <p className="text-slate-600">{selectedNode.description}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {selectedLink && (
+          <Card className="border-slate-200">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">
+                    {selectedLink.source.label} → {selectedLink.target.label}
+                  </CardTitle>
+                  <Badge variant="outline" className="mt-1">
+                    {selectedLink.type}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {selectedLink.description && (
+                <p className="text-slate-600">{selectedLink.description}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <Alert className="border-blue-200 bg-blue-50">
+        <Info className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-800">
+          <strong>How to explore:</strong> Click and drag nodes to explore. Click on a node or connection to see details. 
+          The network shows how concepts from "The Technological Republic" relate to each other.
+          <br /><br />
+          <strong>To modify:</strong> Edit the data in <code>src/lib/networkDiagramData.ts</code>
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
+};
+
+export default NetworkVisualization; 
