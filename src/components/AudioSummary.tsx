@@ -37,7 +37,7 @@ const AudioSummary = () => {
     }
   };
 
-  const handleError = (error: any) => {
+  const handleError = (error: React.SyntheticEvent<HTMLAudioElement, Event>) => {
     console.error('Audio error:', error);
   };
 

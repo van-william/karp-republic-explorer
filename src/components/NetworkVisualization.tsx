@@ -10,20 +10,43 @@ interface NetworkVisualizationProps {
   className?: string;
 }
 
+// Types for the visualization library
+interface VizNode {
+  id: string;
+  label: string;
+  type: string;
+  description?: string;
+  color?: string;
+  size?: number;
+}
+
+interface VizLink {
+  source: VizNode;
+  target: VizNode;
+  type: string;
+  description?: string;
+}
+
+interface VizGraphData {
+  nodes: VizNode[];
+  links: VizLink[];
+}
+
 const NetworkVisualization = ({ className }: NetworkVisualizationProps) => {
-  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
-  const [selectedLink, setSelectedLink] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<VizNode | null>(null);
+  const [selectedLink, setSelectedLink] = useState<VizLink | null>(null);
   
-  const graphRef = useRef<any>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const graphRef = useRef<any>(null);
 
   // Handle node click
-  const handleNodeClick = useCallback((node: any) => {
+  const handleNodeClick = useCallback((node: VizNode) => {
     setSelectedNode(node);
     setSelectedLink(null);
   }, []);
 
   // Handle link click
-  const handleLinkClick = useCallback((link: any) => {
+  const handleLinkClick = useCallback((link: VizLink) => {
     setSelectedLink(link);
     setSelectedNode(null);
   }, []);
@@ -35,7 +58,7 @@ const NetworkVisualization = ({ className }: NetworkVisualizationProps) => {
   }, []);
 
   // Convert data for react-force-graph
-  const graphDataForViz = {
+  const graphDataForViz: VizGraphData = {
     nodes: conceptData.nodes.map(node => ({
       id: node.id,
       label: node.label,
@@ -45,8 +68,22 @@ const NetworkVisualization = ({ className }: NetworkVisualizationProps) => {
       size: node.size
     })),
     links: conceptData.relationships.map(rel => ({
-      source: rel.source,
-      target: rel.target,
+      source: {
+        id: rel.source,
+        label: conceptData.nodes.find(node => node.id === rel.source)?.label || '',
+        type: conceptData.nodes.find(node => node.id === rel.source)?.type || '',
+        description: conceptData.nodes.find(node => node.id === rel.source)?.description,
+        color: conceptData.nodes.find(node => node.id === rel.source)?.color,
+        size: conceptData.nodes.find(node => node.id === rel.source)?.size
+      },
+      target: {
+        id: rel.target,
+        label: conceptData.nodes.find(node => node.id === rel.target)?.label || '',
+        type: conceptData.nodes.find(node => node.id === rel.target)?.type || '',
+        description: conceptData.nodes.find(node => node.id === rel.target)?.description,
+        color: conceptData.nodes.find(node => node.id === rel.target)?.color,
+        size: conceptData.nodes.find(node => node.id === rel.target)?.size
+      },
       type: rel.type,
       description: rel.description
     }))
