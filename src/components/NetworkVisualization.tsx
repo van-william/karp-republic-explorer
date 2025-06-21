@@ -217,14 +217,13 @@ const NetworkVisualization = ({ className }: NetworkVisualizationProps) => {
             enableNodeDrag={true}
             enableNavigationControls={true}
             enablePointerInteraction={true}
-            cooldownTicks={100}
+            cooldownTicks={300}
+            d3AlphaDecay={0.0228}
+            d3VelocityDecay={0.4}
+            warmupTicks={100}
             onEngineStop={() => {
-              // When the force simulation stops, try to center the view
-              setTimeout(() => {
-                if (graphRef.current && graphRef.current.zoomToFit) {
-                  graphRef.current.zoomToFit(400, 80);
-                }
-              }, 50);
+              // Only auto-center on initial load, not on every engine stop
+              console.log('Engine stopped');
             }}
           />
         </div>

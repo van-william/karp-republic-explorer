@@ -124,6 +124,14 @@ const NetworkVisualization2D = ({ className }: NetworkVisualization2DProps) => {
             enableNodeDrag={true}
             linkDirectionalArrowLength={3.5}
             linkDirectionalArrowRelPos={1}
+            cooldownTicks={300}
+            d3AlphaDecay={0.0228}
+            d3VelocityDecay={0.4}
+            warmupTicks={100}
+            onEngineStop={() => {
+              // Only log when engine stops, don't auto-zoom
+              console.log('2D Engine stopped');
+            }}
           />
         </div>
         
