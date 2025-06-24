@@ -82,22 +82,34 @@ karp-republic-explorer/
 - **Context Files**: Add markdown files to `src/context/` for AI context
 - **Audio Content**: Replace `public/audio/book-summary.wav` with your audio file
 
-## Deployment
+## Deployment on Netlify
 
-The application is configured for Netlify deployment:
+The application is optimized for Netlify deployment:
 
-1. Connect your repository to Netlify
-2. Set build command: `npm run build`
-3. Set publish directory: `dist`
-4. Add environment variables in Netlify dashboard
+1. **Connect Repository**
+   - Go to Netlify dashboard
+   - Click "New site from Git"
+   - Connect your repository
+
+2. **Build Settings**
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+   - Node version: 18 or higher
+
+3. **Environment Variables**
+   - Add `VITE_GEMINI_API_KEY` in Netlify dashboard under Site settings > Environment variables
+
+4. **Deploy**
+   - Push to your main branch to trigger automatic deployment
+   - Monitor deployment logs for any issues
 
 ## Development
 
 ### Key Components
 
 - **AudioSummary**: Custom audio player with transcript display
-- **NetworkVisualization**: Interactive 3D force-directed graph
-- **NetworkVisualization2D**: Interactive 2D force-directed graph
+- **NetworkVisualization**: Interactive 3D force-directed graph with improved stability
+- **NetworkVisualization2D**: Interactive 2D force-directed graph with improved stability
 - **ChatInterface**: AI-powered discussion with context awareness
 
 ### Adding Content
@@ -106,85 +118,41 @@ The application is configured for Netlify deployment:
 2. **Network Data**: Modify `networkDiagramData.ts` to add new concepts and relationships
 3. **Context Files**: Add markdown files to enhance AI responses
 
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Technologies Used
+
+- **Vite**: Fast build tool and development server
+- **TypeScript**: Type-safe JavaScript
+- **React**: UI framework
+- **Shadcn/ui**: Modern UI component library
+- **Tailwind CSS**: Utility-first CSS framework
+- **React Force Graph**: Interactive network visualizations
+- **Google Gemini API**: AI-powered chat functionality
+
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Submit a pull request
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
 ## License
 
 MIT License - see LICENSE file for details
-
-## Project info
-
-**URL**: https://lovable.dev/projects/a5f31cb8-d706-47e6-8568-06879ca9e99c
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a5f31cb8-d706-47e6-8568-06879ca9e99c) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a5f31cb8-d706-47e6-8568-06879ca9e99c) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
