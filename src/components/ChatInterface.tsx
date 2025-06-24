@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { generateResponse } from '@/lib/geminiApi';
+import { generateStreamingResponse } from '@/lib/geminiApi';
 import { getRelevantContext } from '@/lib/contextLoader';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: string;
@@ -49,32 +51,51 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
 
+    // Create initial bot message for streaming
+    const botMessageId = (Date.now() + 1).toString();
+    const initialBotMessage: Message = {
+      id: botMessageId,
+      content: '',
+      sender: 'bot',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, initialBotMessage]);
+
     try {
       // Get relevant context for the user's question
-      const context = getRelevantContext(userMessage.content);
+      const context = await getRelevantContext(userMessage.content);
       
-      // Generate response using Gemini API
-      const botContent = await generateResponse(userMessage.content, context);
+      // Generate streaming response using Gemini API
+      await generateStreamingResponse(
+        userMessage.content, 
+        context,
+        (chunk: string) => {
+          // Update the bot message with the new chunk
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === botMessageId 
+                ? { ...msg, content: chunk }
+                : msg
+            )
+          );
+        }
+      );
       
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: botContent,
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       console.error('Error generating response:', error);
       
-      const errorResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'I apologize, but I encountered an error while processing your request. Please check your API key configuration and try again.',
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, errorResponse]);
+      // Update the bot message with error
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === botMessageId 
+            ? { 
+                ...msg, 
+                content: 'I apologize, but I encountered an error while processing your request. Please check your API key configuration and try again.' 
+              }
+            : msg
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -144,7 +165,32 @@ const ChatInterface = () => {
                       {message.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  {message.sender === 'bot' ? (
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          // Customize markdown components for better styling
+                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                          h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-base font-semibold mb-2">{children}</h2>,
+                          h3: ({ children }) => <h3 className="text-sm font-semibold mb-1">{children}</h3>,
+                          ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                          li: ({ children }) => <li className="text-sm">{children}</li>,
+                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                          em: ({ children }) => <em className="italic">{children}</em>,
+                          code: ({ children }) => <code className="bg-slate-200 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                          pre: ({ children }) => <pre className="bg-slate-200 p-2 rounded text-xs font-mono overflow-x-auto">{children}</pre>,
+                          blockquote: ({ children }) => <blockquote className="border-l-4 border-slate-300 pl-3 italic">{children}</blockquote>,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}

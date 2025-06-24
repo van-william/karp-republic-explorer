@@ -1,99 +1,145 @@
-// Context loader for markdown files
+// Context loader for markdown files with embeddings support
+import fs from 'fs';
+import path from 'path';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 interface ContextFile {
   filename: string;
   content: string;
   relevanceScore?: number;
+  lastModified?: number;
+  embedding?: number[];
 }
 
-// In a real implementation, you might want to pre-load these at build time
-// For now, we'll simulate loading context files
-const mockContextFiles: ContextFile[] = [
-  {
-    filename: 'key-themes.md',
-    content: `# Key Themes from "The Technological Republic"
+interface EmbeddingCache {
+  [filename: string]: {
+    embedding: number[];
+    lastModified: number;
+  };
+}
 
-## Central Arguments
+// Initialize Google AI with Vite environment variable
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
-### Technological Power and Governance
-- The book explores how technological capabilities reshape power structures
-- Emphasis on the relationship between technology and democratic governance
-- Analysis of how digital infrastructure affects sovereignty
+// Simple in-memory cache for embeddings
+let embeddingCache: EmbeddingCache = {};
 
-### Soft Belief Systems
-- Concept of "soft belief" as a framework for understanding modern ideological structures
-- How technology influences belief formation and propagation
-- The role of information systems in shaping public opinion
-
-### Western Democratic Challenges
-- Specific challenges facing Western democracies in the digital age
-- Competition with authoritarian technological models
-- The need for democratic adaptation to technological change
-
-### Data and Geopolitics
-- Data as a new form of geopolitical resource
-- The importance of data sovereignty
-- How data flows affect international relations
-
-## Key Questions the Book Addresses
-
-- How should democratic societies respond to technological authoritarianism?
-- What role should the state play in regulating technology?
-- How can Western democracies maintain their values while competing technologically?
-- What is the relationship between technological innovation and democratic governance?`
-  },
-  {
-    filename: 'soft-belief.md',
-    content: `# Soft Belief Systems
-
-## Definition and Core Concept
-
-"Soft belief" represents a framework for understanding how beliefs are formed and maintained in the digital age, distinct from traditional "hard" ideological structures.
-
-## Key Characteristics
-
-### Flexibility and Adaptability
-- Unlike rigid ideological systems, soft beliefs can evolve and adapt
-- Responsive to new information and changing circumstances
-- Allows for nuanced positions rather than binary thinking
-
-### Information-Based Formation
-- Beliefs shaped by information flows and digital environments
-- Influenced by algorithmic curation and social media ecosystems
-- Subject to manipulation through information warfare
-
-### Democratic Implications
-- Affects how democratic societies form consensus
-- Challenges traditional political organizing models
-- Creates opportunities and vulnerabilities for democratic discourse
-
-## Relationship to Technology
-
-### Digital Influence
-- Social media platforms shape belief formation
-- Algorithmic recommendations affect what information people see
-- Echo chambers and filter bubbles reinforce existing beliefs
-
-### Information Warfare
-- Soft beliefs can be targeted and manipulated
-- Foreign influence operations exploit flexible belief systems
-- Disinformation campaigns more effective against soft belief structures
-
-## Strategic Considerations
-
-### For Democratic Societies
-- Need to understand and work with soft belief systems
-- Importance of information literacy and critical thinking
-- Balancing openness with protection against manipulation
-
-### For Policy Makers
-- Traditional propaganda models insufficient
-- Need new approaches to counter disinformation
-- Importance of building resilient information ecosystems`
+// Dynamic context loading from /context directory
+async function loadContextFiles(): Promise<ContextFile[]> {
+  try {
+    const contextDir = path.join(process.cwd(), 'context');
+    const files = fs.readdirSync(contextDir);
+    
+    const contextFiles: ContextFile[] = [];
+    
+    for (const file of files) {
+      // Skip README.md and non-markdown files
+      if (file === 'README.md' || !file.endsWith('.md')) {
+        continue;
+      }
+      
+      const filePath = path.join(contextDir, file);
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const stats = fs.statSync(filePath);
+      
+      contextFiles.push({
+        filename: file,
+        content: content,
+        lastModified: stats.mtime.getTime()
+      });
+    }
+    
+    console.log(`Loaded ${contextFiles.length} context files:`, contextFiles.map(f => f.filename));
+    return contextFiles;
+  } catch (error) {
+    console.error('Error loading context files:', error);
+    return [];
   }
-];
+}
 
-// Simple keyword-based relevance scoring
-function calculateRelevance(userQuery: string, content: string): number {
+// Generate embeddings for content using Google GenAI
+async function generateEmbedding(text: string): Promise<number[]> {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-embedding-exp-03-07' });
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  } catch (error) {
+    console.error('Error generating embedding:', error);
+    return [];
+  }
+}
+
+// Calculate cosine similarity between two vectors
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  if (vecA.length !== vecB.length) return 0;
+  
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+// Get embeddings for context files (with caching)
+async function getContextEmbeddings(contextFiles: ContextFile[]): Promise<ContextFile[]> {
+  const filesWithEmbeddings: ContextFile[] = [];
+  
+  for (const file of contextFiles) {
+    const cacheKey = file.filename;
+    const cached = embeddingCache[cacheKey];
+    
+    // Check if we have a valid cached embedding
+    if (cached && cached.lastModified === file.lastModified) {
+      filesWithEmbeddings.push({
+        ...file,
+        embedding: cached.embedding
+      });
+    } else {
+      // Generate new embedding
+      const embedding = await generateEmbedding(file.content);
+      embeddingCache[cacheKey] = {
+        embedding,
+        lastModified: file.lastModified!
+      };
+      
+      filesWithEmbeddings.push({
+        ...file,
+        embedding
+      });
+    }
+  }
+  
+  return filesWithEmbeddings;
+}
+
+// Calculate relevance using embeddings (semantic search)
+async function calculateSemanticRelevance(userQuery: string, contextFiles: ContextFile[]): Promise<ContextFile[]> {
+  // Generate embedding for user query
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  if (queryEmbedding.length === 0) {
+    // Fallback to keyword search if embedding fails
+    return contextFiles.map(file => ({
+      ...file,
+      relevanceScore: calculateKeywordRelevance(userQuery, file.content)
+    }));
+  }
+  
+  // Calculate semantic similarity for each context file
+  return contextFiles.map(file => ({
+    ...file,
+    relevanceScore: file.embedding ? cosineSimilarity(queryEmbedding, file.embedding) : 0
+  }));
+}
+
+// Fallback keyword-based relevance scoring
+function calculateKeywordRelevance(userQuery: string, content: string): number {
   const queryWords = userQuery.toLowerCase().split(/\s+/);
   const contentWords = content.toLowerCase().split(/\s+/);
   
@@ -109,12 +155,15 @@ function calculateRelevance(userQuery: string, content: string): number {
 }
 
 // Get relevant context for a user query
-export function getRelevantContext(userQuery: string, maxContext: number = 2000): string {
-  // Score all context files
-  const scoredFiles = mockContextFiles.map(file => ({
-    ...file,
-    relevanceScore: calculateRelevance(userQuery, file.content)
-  }));
+export async function getRelevantContext(userQuery: string, maxContext: number = 2000): Promise<string> {
+  // Load context files dynamically
+  const contextFiles = await loadContextFiles();
+  
+  // Get embeddings for all context files
+  const filesWithEmbeddings = await getContextEmbeddings(contextFiles);
+  
+  // Calculate semantic relevance
+  const scoredFiles = await calculateSemanticRelevance(userQuery, filesWithEmbeddings);
   
   // Sort by relevance and take the most relevant
   const relevantFiles = scoredFiles
@@ -137,11 +186,11 @@ export function getRelevantContext(userQuery: string, maxContext: number = 2000)
     currentLength += file.content.length;
   }
   
+  console.log(`Found ${relevantFiles.length} relevant files for query: "${userQuery}"`);
   return combinedContext;
 }
 
-// TODO: In a real implementation, you would:
-// 1. Load actual markdown files from the context directory
-// 2. Use a more sophisticated similarity search (embeddings)
-// 3. Cache loaded files for performance
-// 4. Support file watching for updates 
+// Clear embedding cache (useful for development)
+export function clearEmbeddingCache(): void {
+  embeddingCache = {};
+} 

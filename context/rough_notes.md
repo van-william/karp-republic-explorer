@@ -35,3 +35,46 @@
     - Karp views that the US is neglecting hard power. Military spending and investment has been misguided
     - Silicon Valley has engaged with trivial pursuits
     - The decline in teaching western civilization teaching has created this; there’s a lack of grounding in terms of the American purpose and focus; there’s a sense of aimlessness and drifting with a lack of western civ.
+- Usage of Data:
+    - It’s super interesting that people decried the usage of Palantir for national security (e.g., Police) despite usage abroad. For example, New Orleans Police were using Palantir to investigate murders but then protests started around a “Surveillance State” concern. However, the people that don’t want this… what are they for? it’s an odd pushback
+- Post-Nationalism
+    - Karp talks about how liberalism in the left almost considers our culture a post-nationalism.
+    - **Erosion of Western Identity and Purpose**: Karp believes that post-nationalist ideas, particularly those stemming from academia, have led to a "pagan religion" infiltrating universities. He argues that this ideology incorrectly teaches that "the West is inferior" and has fostered a sense of cultural relativism that undermines the belief in America's shared culture and national identity.
+    - Luxury Beliefs: Simply put: if you live in a gated community, you can support defunding the police because of your neighborhood’s private security force. it’s a luxury belief because you have less need of these public services.
+- What remained after the dot com bubble burst: A new organizational model
+    - Lesser known result of the dot com bubble was a new organizational model. reduced middle management layers. focus on impact and outcomes
+    - Karp highlights how ambiguity and voids in leadership are actually good. it’s interesting to see who steps up and leads. this is a natural form of leadership development.
+    - Karp highlights how IBM and other larger organizations had devolved into a top-down monolithic org. the dot com bubble dramatically shook this up.
+- Additional themes:
+    - Very similar to Team of Teams, using the same WW1 / WW2 thinking to address terrorists  and improvised explosive devices would not work. Spending $100k to address a $200 explosive was not sustainable. The Army needed a new culture, new processes, and new tools. Palantir was a tool but also ushered in a new culture of enabling the right stakeholders with the right tools
+- Military Procurement Process:
+    - Karp gives the example of how complex and opaque the military procurement process can be: for the Gulf War, the Military required thousands of additional two-way radios. They had the best fighter jets, best weapons, best intelligence tools, but they fell apart becauase they didn’t have enough radios.. why? they needed to procure them from Motorola but Motorola couldn’t provide detailed costing information in order to go forward with the the procurement process. Because of this, the military had to later go through Japan’s ministry of defense to procure the radios. This was insane.
+    - Broader view: A lot of regulation was ideal for WW2 but has slowed down the US ever since.
+        - cost-plus contracts: this was intended to accelerate production during WW2 from industrial companies not familiar with defense production
+        - detailed cost accounting: this was the audit process for the cost-plus contracts, but now this had become a critical bottleneck in the procurement process.
+- Bees and other animals:
+    - In one chapter, Karp notes how several animals did not necessarily rely on a strict top-down order and structure. Everyone typically thikns of Bees as a hierarchical society with the Queen Bee on top. However, the bee movements and communications are actually fairly decentralized.
+    - Similar to this, Karp notes how most orgs can retain at most 150 people. This was also quoted by Malcom Gladwell. (Seen in WL Gore and other companies too)
+    - Larger orgs will require so many more layers of middle management
+    - There is a large communication radius now with social media and digital forms of communication too which can distract from face to face communications
+- Singapore
+    - What a crazy event: a small island originally part of Malaysia which was originally a british colony eventually grows to become a globally influential country…
+    - Singapore aims to pay its governemnt officials wages in line with the private sector in hopes of attracting top talent — Karp thinks that paying such influential people like Jerome Powell ~$190k is limiting the number of people who are actually pursuing these jobs.
+    - Singapore made a key decision to have a focused language approach around Chinese and English. Before, there were 10-12 languages spoken (Hainanese, Shanghainese, etc.)
+    - There’s this balance of university and diversity. Has the left pushed for diversity so much in that it has abandoned any sense of university? There’s even this push to be “post national” and “post American”. is this too far?
+- Founder Led Companies
+    - Karp also talks about how founder led companies dominate. there’s a founder mentality and vision. the Old VC way was to replace the founder with a traditional operating CEO around series B / C raises.
+- An Aesthetic Point of View
+    - Shared american experiences have moved from civic and political to entertainement, celebrities, sports, etc.
+    - In some ways, Silicon Valley filled a void — it filled a void of a craving for build, have ownership of success, and a commitment to results.
+    - Many nations affirm the value of shared cultural traditions, mythologies. overly nationalistic nations have risks but the opposite is also a risk.
+- What do we need to re-embrace a technological republic?
+    - re-embrace of the collective experience
+    - shared purpose and identity
+    - civic rituals capable of bringing us together
+
+## Other books that had related themes:”
+
+- Network State: some related ideas on hard power vs. soft power
+- Abolition of Man: the removal of western civilization reminded me a lot about the whole facts vs. values and seeking to remove objective truth from curriculum
+- Team of Teams: the bee movements and decentralized structures made me think a lot about bee movement and communications discussed in the book as well.
