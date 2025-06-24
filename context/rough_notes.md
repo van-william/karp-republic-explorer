@@ -1,0 +1,37 @@
+## Rough Notes
+
+- Silicon Valley has gone from a vanguard of defense innovation to shying away from any collaboration with DoD / military / primes / etc.
+- We (US) seem to think it’s low brow to work on defense projects in tech but let other countries do it
+- We (US) are essentially funding NATO’s security through our defense budget
+- We (US) won World War 2 through supreme manufacturing capacity
+- China is our biggest political adversary right now
+- Top image recognition / facial recognition companies are mostly based outside the US
+- <0.2% of the DoD budget is targeting Artificial Intelligence; this is a concern of priorities
+- Hypothesis: The cost-plus contracts were necessary to galvanize US’s industrial base to enable military capacity; however, this also was later unchecked and grew into an unhealthy military industrial complex.
+- Similar to Zero to One by Peter Thiel, Karp talks a lot about America’s view of indefinite Optimism. Contrasted to Europe’s definite pessimism, there’s this indefinite optimism in the US that the US will cotninue to be a leader / great country. This does not come passively.
+- US curriculum also stopped teaching Western Civilization
+    - This seemed like a minro chnage but overall, it was difficult to ascribe clear meaning or purpose of the US. US history was no longer anchored by Europe history.
+    - This “deconstruction” of a coherent western civilization led to later ambiguity in purpose
+- THe idea of technological agnostics
+    - Technological Agnostics: people building stuff because it’s interesting; divorced from any broader or greater purpose
+    - Karp quotes the rising employment of finance and management consulting careers
+    - Mixing technological agnosticism with a concentrated supply base — how will these concentrated companies remain accountable to the american public?
+- The technological agnostic idea is also related to overall misdirection of tech in silicon valley
+    - Peter Thiel said we wanted flying cars and space travel but instead we got 140 characters (twitter)
+    - With the removal of western civilization, there’s a lack of grounding in terms of American history; why did we get here? where did we come from?
+- Consolidation of power is also a concern with this level of ambiguity and ambivalence towards applications of tech
+- Hard power vs. soft power
+    - Hard power is coercive
+    - Soft power is influential
+    - Hard Power examples:
+        - Military strength
+        - Sanctions
+        - Compelling force
+        - Immediate
+    - Soft power
+        - persuasion
+        - public diplomacy
+        - Foreign policy
+    - Karp views that the US is neglecting hard power. Military spending and investment has been misguided
+    - Silicon Valley has engaged with trivial pursuits
+    - The decline in teaching western civilization teaching has created this; there’s a lack of grounding in terms of the American purpose and focus; there’s a sense of aimlessness and drifting with a lack of western civ.

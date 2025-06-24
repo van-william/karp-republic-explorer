@@ -1,29 +1,42 @@
-// Simple concept data for "The Technological Republic" network visualization
-// Easy to modify - just update this file to change the network
+// networkDiagramData.ts
+// Enhanced data structures for creating more meaningful network visualizations.
+// This file contains the interfaces and sample data for the graph.
 
+/**
+ * Represents a single node in the network graph.
+ */
 export interface GraphNode {
   id: string;
   label: string;
-  type: 'Concept' | 'Actor' | 'Technology' | 'Event';
+  type: 'Concept' | 'Actor' | 'Technology' | 'Event' | 'Policy';
   description?: string;
-  color?: string;
-  size?: number;
+  importance?: number; // A score from 1-10 to influence size or centrality
+  tags?: string[]; // For filtering and additional context
+  color?: string; // Overrides default color
+  size?: number; // Overrides default size
 }
 
+/**
+ * Represents a relationship (or edge) between two nodes.
+ */
 export interface GraphRelationship {
   id: string;
   source: string;
   target: string;
-  type: 'INFLUENCES' | 'ENABLES' | 'CHALLENGES' | 'REINFORCES' | 'OPPOSES';
+  type: 'INFLUENCES' | 'ENABLES' | 'CHALLENGES' | 'REINFORCES' | 'OPPOSES' | 'CREATES' | 'DEPENDS_ON' | 'CONTRADICTS';
   description?: string;
+  weight?: number; // Represents the strength of the connection (e.g., 1 to 5)
 }
 
+/**
+ * The main container for all graph data.
+ */
 export interface GraphData {
   nodes: GraphNode[];
   relationships: GraphRelationship[];
 }
 
-// Sample data for "The Technological Republic"
+// --- SAMPLE DATA for "The Technological Republic" ---
 export const conceptData: GraphData = {
   nodes: [
     // Core Concepts
@@ -31,59 +44,67 @@ export const conceptData: GraphData = {
       id: 'soft-belief', 
       label: 'Soft Belief', 
       type: 'Concept', 
-      description: 'Framework for understanding modern ideological structures and how they shape behavior without explicit coercion',
-      color: '#3B82F6', 
-      size: 20 
+      description: 'Framework for understanding modern ideological structures that shape behavior without explicit coercion.',
+      importance: 9,
+      tags: ['ideology', 'sociology', 'power']
     },
     { 
       id: 'data-sovereignty', 
       label: 'Data Sovereignty', 
       type: 'Concept', 
-      description: 'Control over data flows and digital infrastructure as a form of national power',
-      color: '#3B82F6', 
-      size: 20 
+      description: 'The assertion of control over data flows and digital infrastructure as a form of national power.',
+      importance: 8,
+      tags: ['geopolitics', 'data', 'governance']
     },
     { 
       id: 'technological-power', 
       label: 'Technological Power', 
       type: 'Concept', 
-      description: 'How technology reshapes power structures and creates new forms of influence',
-      color: '#3B82F6', 
-      size: 20 
+      description: 'How technology reshapes power structures, creating new forms of influence and control.',
+      importance: 10,
+      tags: ['power', 'technology', 'geopolitics']
     },
     { 
       id: 'digital-transformation', 
       label: 'Digital Transformation', 
       type: 'Concept', 
-      description: 'Society-wide changes driven by digital technology adoption',
-      color: '#3B82F6', 
-      size: 18 
+      description: 'The society-wide changes driven by the adoption of digital technology.',
+      importance: 7,
+      tags: ['society', 'technology', 'economy']
     },
-    
+    {
+      id: 'digital-public-sphere',
+      label: 'Digital Public Sphere',
+      type: 'Concept',
+      description: 'Online spaces where political and social discourse occurs, shaping public opinion.',
+      importance: 8,
+      tags: ['discourse', 'politics', 'society']
+    },
+
     // Actors
     { 
       id: 'western-democracies', 
       label: 'Western Democracies', 
       type: 'Actor', 
-      description: 'Democratic nations facing technological challenges and competition',
-      color: '#10B981', 
-      size: 18 
+      description: 'Democratic nations navigating technological challenges and global competition.',
+      importance: 8,
+      tags: ['state-actor', 'governance']
     },
     { 
       id: 'authoritarian-regimes', 
       label: 'Authoritarian Regimes', 
       type: 'Actor', 
-      description: 'Authoritarian states using technology for control and surveillance',
-      color: '#10B981', 
-      size: 18 
+      description: 'States leveraging technology for centralized control, surveillance, and influence operations.',
+      importance: 8,
+      tags: ['state-actor', 'governance']
     },
     { 
       id: 'tech-companies', 
       label: 'Tech Companies', 
       type: 'Actor', 
-      description: 'Large technology corporations with significant influence over digital infrastructure',
-      color: '#10B981', 
-      size: 16 
+      description: 'Multinational corporations that build and control key digital infrastructure and platforms.',
+      importance: 9,
+      tags: ['corporate-actor', 'economy']
     },
     
     // Technologies
@@ -91,197 +112,141 @@ export const conceptData: GraphData = {
       id: 'social-media', 
       label: 'Social Media', 
       type: 'Technology', 
-      description: 'Platforms that shape belief formation and information dissemination',
-      color: '#F59E0B', 
-      size: 16 
+      description: 'Platforms that mediate information dissemination and social interaction.',
+      importance: 9,
+      tags: ['communication', 'platform']
     },
     { 
       id: 'ai-systems', 
       label: 'AI Systems', 
       type: 'Technology', 
-      description: 'Artificial intelligence and machine learning systems',
-      color: '#F59E0B', 
-      size: 16 
+      description: 'Artificial intelligence and machine learning that power automation and personalization.',
+      importance: 10,
+      tags: ['automation', 'data-analysis']
     },
     { 
       id: 'digital-infrastructure', 
       label: 'Digital Infrastructure', 
       type: 'Technology', 
-      description: 'Core digital systems, networks, and platforms',
-      color: '#F59E0B', 
-      size: 16 
+      description: 'The core digital systems, networks, cloud services, and platforms.',
+      importance: 8,
+      tags: ['network', 'platform']
     },
     { 
       id: 'surveillance-tech', 
-      label: 'Surveillance Technology', 
+      label: 'Surveillance Tech', 
       type: 'Technology', 
-      description: 'Technologies used for monitoring and control',
-      color: '#F59E0B', 
-      size: 14 
+      description: 'Technologies used for monitoring, tracking, and social control.',
+      importance: 7,
+      tags: ['control', 'security']
     },
-    
+    {
+      id: 'cybersecurity-tech',
+      label: 'Cybersecurity Tech',
+      type: 'Technology',
+      description: 'Technologies and practices designed to protect networks and data from attack.',
+      importance: 6,
+      tags: ['security', 'defense']
+    },
+
     // Events
     { 
       id: 'information-warfare', 
       label: 'Information Warfare', 
       type: 'Event', 
-      description: 'Conflict through information manipulation and disinformation',
-      color: '#EF4444', 
-      size: 14 
-    },
-    { 
-      id: 'data-breaches', 
-      label: 'Data Breaches', 
-      type: 'Event', 
-      description: 'Security incidents involving unauthorized access to data',
-      color: '#EF4444', 
-      size: 12 
+      description: 'State-sponsored or organized conflict through information manipulation and disinformation.',
+      importance: 8,
+      tags: ['conflict', 'geopolitics']
     },
     { 
       id: 'algorithmic-bias', 
       label: 'Algorithmic Bias', 
       type: 'Event', 
-      description: 'Systematic discrimination in automated decision-making systems',
-      color: '#EF4444', 
-      size: 12 
+      description: 'Systematic and repeatable errors in a computer system that create unfair outcomes.',
+      importance: 6,
+      tags: ['ethics', 'fairness']
+    },
+
+    // Policies & Regulations
+    {
+      id: 'data-privacy-laws',
+      label: 'Data Privacy Laws',
+      type: 'Policy',
+      description: 'Regulations like GDPR and CCPA that govern data collection and use.',
+      importance: 7,
+      tags: ['governance', 'law', 'data']
     }
   ],
   relationships: [
-    // Soft Belief connections
-    { 
-      id: '1', 
-      source: 'soft-belief', 
-      target: 'social-media', 
-      type: 'INFLUENCES', 
-      description: 'Social media platforms shape soft belief formation through algorithmic curation' 
-    },
-    { 
-      id: '2', 
-      source: 'digital-transformation', 
-      target: 'soft-belief', 
-      type: 'INFLUENCES', 
-      description: 'Digital transformation influences belief systems and social norms' 
-    },
-    { 
-      id: '3', 
-      source: 'ai-systems', 
-      target: 'soft-belief', 
-      type: 'INFLUENCES', 
-      description: 'AI systems can influence belief formation through personalized content' 
-    },
+    // Connections between Core Concepts
+    { id: 'r1', source: 'technological-power', target: 'data-sovereignty', type: 'INFLUENCES', weight: 4 },
+    { id: 'r2', source: 'digital-transformation', target: 'digital-public-sphere', type: 'CREATES', weight: 5 },
+    { id: 'r3', source: 'soft-belief', target: 'digital-public-sphere', type: 'INFLUENCES', weight: 5 },
+
+    // How technology enables concepts and actors
+    { id: 'r4', source: 'ai-systems', target: 'technological-power', type: 'REINFORCES', weight: 5, description: 'AI capabilities are a primary driver of modern technological power.' },
+    { id: 'r5', source: 'digital-infrastructure', target: 'data-sovereignty', type: 'ENABLES', weight: 4, description: 'Control over infrastructure is a prerequisite for data sovereignty.' },
+    { id: 'r6', source: 'social-media', target: 'soft-belief', type: 'REINFORCES', weight: 5, description: 'Social media algorithms shape belief systems at scale.' },
+    { id: 'r7', source: 'surveillance-tech', target: 'authoritarian-regimes', type: 'ENABLES', weight: 5 },
+    { id: 'r8', source: 'social-media', target: 'information-warfare', type: 'ENABLES', weight: 4 },
     
-    // Data Sovereignty connections
-    { 
-      id: '4', 
-      source: 'data-sovereignty', 
-      target: 'western-democracies', 
-      type: 'CHALLENGES', 
-      description: 'Data sovereignty challenges democratic governance and privacy rights' 
-    },
-    { 
-      id: '5', 
-      source: 'data-sovereignty', 
-      target: 'tech-companies', 
-      type: 'CHALLENGES', 
-      description: 'Data sovereignty challenges tech company business models' 
-    },
-    { 
-      id: '6', 
-      source: 'digital-infrastructure', 
-      target: 'data-sovereignty', 
-      type: 'ENABLES', 
-      description: 'Digital infrastructure enables data sovereignty through control mechanisms' 
-    },
-    
-    // Technological Power connections
-    { 
-      id: '7', 
-      source: 'ai-systems', 
-      target: 'technological-power', 
-      type: 'REINFORCES', 
-      description: 'AI systems reinforce technological power structures' 
-    },
-    { 
-      id: '8', 
-      source: 'surveillance-tech', 
-      target: 'technological-power', 
-      type: 'REINFORCES', 
-      description: 'Surveillance technology reinforces technological power through monitoring' 
-    },
-    { 
-      id: '9', 
-      source: 'tech-companies', 
-      target: 'technological-power', 
-      type: 'REINFORCES', 
-      description: 'Tech companies reinforce technological power through platform control' 
-    },
-    
-    // Information Warfare connections
-    { 
-      id: '10', 
-      source: 'social-media', 
-      target: 'information-warfare', 
-      type: 'ENABLES', 
-      description: 'Social media enables information warfare through rapid dissemination' 
-    },
-    { 
-      id: '11', 
-      source: 'information-warfare', 
-      target: 'western-democracies', 
-      type: 'CHALLENGES', 
-      description: 'Information warfare challenges democratic discourse and trust' 
-    },
-    { 
-      id: '12', 
-      source: 'authoritarian-regimes', 
-      target: 'information-warfare', 
-      type: 'ENABLES', 
-      description: 'Authoritarian regimes enable information warfare for control' 
-    },
-    
-    // Opposition and Challenges
-    { 
-      id: '13', 
-      source: 'authoritarian-regimes', 
-      target: 'digital-infrastructure', 
-      type: 'OPPOSES', 
-      description: 'Authoritarian regimes oppose open digital infrastructure' 
-    },
-    { 
-      id: '14', 
-      source: 'algorithmic-bias', 
-      target: 'western-democracies', 
-      type: 'CHALLENGES', 
-      description: 'Algorithmic bias challenges democratic principles of fairness' 
-    },
-    { 
-      id: '15', 
-      source: 'data-breaches', 
-      target: 'data-sovereignty', 
-      type: 'CHALLENGES', 
-      description: 'Data breaches challenge data sovereignty and security' 
-    }
+    // Challenges and Oppositions
+    { id: 'r9', source: 'data-sovereignty', target: 'tech-companies', type: 'CHALLENGES', weight: 4, description: 'National data sovereignty policies can fragment the global market for tech companies.' },
+    { id: 'r10', source: 'information-warfare', target: 'western-democracies', type: 'CHALLENGES', weight: 5, description: 'Disinformation campaigns erode trust in democratic institutions.' },
+    { id: 'r11', source: 'algorithmic-bias', target: 'ai-systems', type: 'CHALLENGES', weight: 3, description: 'Bias is a fundamental technical and ethical challenge in AI development.' },
+    { id: 'r12', source: 'western-democracies', target: 'authoritarian-regimes', type: 'OPPOSES', weight: 4 },
+    { id: 'r13', source: 'cybersecurity-tech', target: 'information-warfare', type: 'OPPOSES', weight: 3 },
+
+    // Policy and Regulation Connections
+    { id: 'r14', source: 'data-privacy-laws', target: 'tech-companies', type: 'CHALLENGES', weight: 4, description: 'Privacy laws impose compliance costs and restrict data collection practices.' },
+    { id: 'r15', source: 'data-privacy-laws', target: 'data-sovereignty', type: 'REINFORCES', weight: 3 },
+    { id: 'r16', source: 'western-democracies', target: 'data-privacy-laws', type: 'CREATES', weight: 4 }
   ]
 };
 
-// Helper function to get node color by type
-export const getNodeColor = (type: string): string => {
+
+// --- HELPER FUNCTIONS ---
+
+/**
+ * Provides a default color based on the node's type.
+ * @param type The type of the node.
+ * @returns A hex color string.
+ */
+export const getNodeColor = (type: GraphNode['type']): string => {
   const colors = {
-    'Concept': '#3B82F6', // Blue
-    'Actor': '#10B981',   // Green
-    'Technology': '#F59E0B', // Yellow
-    'Event': '#EF4444'    // Red
+    'Concept': '#3B82F6',    // Blue
+    'Actor': '#10B981',      // Green
+    'Technology': '#F59E0B', // Amber
+    'Event': '#EF4444',      // Red
+    'Policy': '#8B5CF6',     // Violet
   };
-  return colors[type as keyof typeof colors] || '#6B7280';
+  return colors[type] || '#6B7280'; // Default to gray
 };
 
-// Helper function to get node size by type
-export const getNodeSize = (type: string): number => {
-  const sizes = {
-    'Concept': 20,
-    'Actor': 18,
-    'Technology': 16,
-    'Event': 14
-  };
-  return sizes[type as keyof typeof sizes] || 15;
+/**
+ * Provides a default size based on the node's importance score.
+ * @param importance The importance score of the node (1-10).
+ * @returns A numerical size for the node.
+ */
+export const getNodeSize = (importance: number = 5): number => {
+  return 10 + (importance * 2); // Base size 10, scales up to 30
+};
+
+/**
+ * Provides a color for a relationship link based on its type.
+ * @param type The type of the relationship.
+ * @returns A hex color string.
+ */
+export const getLinkColor = (type: GraphRelationship['type']): string => {
+    const colors = {
+        'INFLUENCES': '#6B7280',    // Gray
+        'ENABLES': '#10B981',       // Green
+        'CHALLENGES': '#F59E0B',    // Amber
+        'REINFORCES': '#3B82F6',    // Blue
+        'OPPOSES': '#EF4444',       // Red
+        'CREATES': '#8B5CF6',       // Violet
+        'DEPENDS_ON': '#9CA3AF',    // Light Gray
+        'CONTRADICTS': '#F87171',   // Light Red
+    };
+    return colors[type] || '#6B7280';
 }; 

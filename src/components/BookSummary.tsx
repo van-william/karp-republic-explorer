@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Info, Lightbulb, Globe, Shield, Cpu } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Lightbulb, Globe, Shield, Cpu, Building } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -23,48 +22,64 @@ const BookSummary = () => {
       id: 'core-thesis',
       title: 'Core Thesis',
       icon: Lightbulb,
-      description: 'The central argument of the technological republic',
+      description: 'The central argument about America\'s technological and cultural drift',
       content: [
-        'Technology has become the defining force in modern geopolitical power structures',
-        'Western democracies must balance technological advancement with democratic values',
-        'The future of Western civilization depends on mastering this technological-political synthesis',
-        'Traditional notions of power must evolve to incorporate technological capabilities'
+        'Silicon Valley has abandoned its foundational collaboration with defense and government',
+        'The removal of Western Civilization from education has created a crisis of American identity and purpose',
+        'Current engineers build technology without connection to broader meaning or national strategic goals',
+        'America must rebuild a "Technological Republic" that combines innovation with clear national purpose and values'
       ]
     },
     {
-      id: 'hard-power',
-      title: 'Hard Power in the Digital Age',
-      icon: Shield,
-      description: 'How traditional power structures adapt to technology',
-      content: [
-        'Military capabilities increasingly depend on technological superiority',
-        'Economic power flows through technological infrastructure and innovation',
-        'Data and algorithms become new forms of strategic assets',
-        'Technological dependencies create new vulnerabilities and strengths'
-      ]
-    },
-    {
-      id: 'soft-belief',
-      title: 'Soft Belief Systems',
-      icon: Globe,
-      description: 'The role of ideology and culture in technological governance',
-      content: [
-        'Democratic values must be preserved while embracing technological change',
-        'Cultural narratives shape how societies adopt and regulate technology',
-        'Belief systems influence technological development and deployment',
-        'The West\'s liberal democratic traditions face challenges from authoritarian tech models'
-      ]
-    },
-    {
-      id: 'future-west',
-      title: 'Future of the West',
+      id: 'software-century',
+      title: 'Part 1: Software Century',
       icon: Cpu,
-      description: 'Implications for Western civilization and global leadership',
+      description: 'The loss of purpose and meaning in modern technology work',
       content: [
-        'Western nations must maintain technological competitiveness',
-        'Democratic institutions need to evolve for the digital age',
-        'Alliance structures must incorporate technological cooperation',
-        'Educational and cultural systems require fundamental updates'
+        'Current generation of software engineers has become unmoored from core purpose or grander meaning',
+        'Engineers are hesitant to work on defense applications, despite the internet\'s origins in DARPA',
+        'Silicon Valley has strayed from its tradition of collaboration with the US Government',
+        'Focus has shifted primarily to consumer markets while avoiding defense altogether',
+        'Historical irony: foundational technologies came from defense programs, but such collaboration is now unthinkable'
+      ]
+    },
+    {
+      id: 'american-mind',
+      title: 'Part 2: Hollowing Out of the American Mind',
+      icon: Globe,
+      description: 'The fundamental dismantling of American and Western identity',
+      content: [
+        'Technological Agnosticism: people build because they enjoy building, detached from purpose and outcomes',
+        'The abandonment of Western Civilization education led to loose anchoring of American purpose',
+        'People oppose Defense/Government projects but struggle to articulate what they actually stand for',
+        'Post-nationalist ideologies have created cultural relativism that undermines shared national identity',
+        'Academic ideas incorrectly teach that "the West is inferior" and foster luxury beliefs among elites'
+      ]
+    },
+    {
+      id: 'engineering-mindset',
+      title: 'Part 3: Engineering Mindset',
+      icon: Building,
+      description: 'Applying engineering principles to organizational and governmental structures',
+      content: [
+        'Palantir and tech startups have fundamentally rejected traditional corporate hierarchies',
+        'Creative friction and rejecting intellectual fragility are vital to organizational growth',
+        'Skepticism of ideology in favor of pursuit of tangible results and outcomes',
+        'Learning from decentralized systems like bee swarms that operate without strict top-down control',
+        'Military needs better intelligence tools and faster procurement processes, not just better weapons'
+      ]
+    },
+    {
+      id: 'rebuilding-republic',
+      title: 'Part 4: Rebuilding the Technological Republic',
+      icon: Shield,
+      description: 'Reasserting national culture and engaging with critical public domains',
+      content: [
+        'Silicon Valley remains reticent to enter public domains: medicine, education, law, and defense',
+        'Rebuilding requires reassertion of national culture and clear American values',
+        'Need for clearer collective identity and common purpose beyond entertainment and consumption',
+        'Emphasis on hard power (military, technological strength) balanced with cultural influence',
+        'Restoration of civic rituals and shared experiences that bind society together'
       ]
     }
   ];
@@ -75,7 +90,7 @@ const BookSummary = () => {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-slate-800 mb-4">Interactive Book Summary</h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore the key themes and arguments through expandable sections with detailed analysis
+            Explore the key themes and arguments from Alex Karp's analysis of America's technological and cultural challenges
           </p>
         </div>
 
@@ -144,10 +159,10 @@ const BookSummary = () => {
           </CardHeader>
           <CardContent>
             <p className="text-blue-700 leading-relaxed">
-              "The Technological Republic" argues that the West must develop new frameworks for 
-              integrating technological power with democratic governance, creating a synthesis 
-              that preserves liberal values while maintaining competitive advantage in an 
-              increasingly complex global landscape.
+              "The Technological Republic" argues that America must reconnect its technological innovation 
+              with national purpose and Western values. Karp believes that without this reconnection—through 
+              restored civic education, defense collaboration, and purpose-driven engineering—the United States 
+              risks losing both its technological edge and cultural foundation to more unified adversaries.
             </p>
           </CardContent>
         </Card>
