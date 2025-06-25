@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { BookOpen, MessageCircle, Users, ExternalLink, ChevronDown, ChevronUp, Quote, Network, Volume2 } from 'lucide-react';
+import { BookOpen, MessageCircle, ExternalLink, Network, Volume2 } from 'lucide-react';
 import ChatInterface from '@/components/ChatInterface';
 import BookSummary from '@/components/BookSummary';
 import ChapterBreakdown from '@/components/ChapterBreakdown';

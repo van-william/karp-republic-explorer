@@ -43,115 +43,93 @@ karp-republic-explorer/
 └── .env                           # Environment variables
 ```
 
-## Quick Start
+## Setup and Configuration
 
-1. **Clone and install dependencies**
-   ```bash
-   git clone <repository-url>
-   cd karp-republic-explorer
-   npm install
-   ```
+### 1. Project Setup
 
-2. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Add your Gemini API key: VITE_GEMINI_API_KEY=your_key_here
-   ```
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd karp-republic-explorer
 
-3. **Add audio content**
-   - Place your `book-summary.wav` file in `public/audio/`
-   - Update the transcript in `AudioSummary.tsx` to match your audio
+# Install dependencies
+npm install
+```
 
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
+### 2. Environment Configuration
 
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
+```bash
+# Copy the example environment file
+cp .env.example .env
 
-## Configuration
+# Edit .env and add your Gemini API key
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-### Environment Variables
-- `VITE_GEMINI_API_KEY`: Google Gemini API key for AI discussions
+**Getting a Gemini API Key:**
 
-### Customization
-- **Network Data**: Edit `src/lib/networkDiagramData.ts` to modify the concept network
-- **Context Files**: Add markdown files to `src/context/` for AI context
-- **Audio Content**: Replace `public/audio/book-summary.wav` with your audio file
+1.  Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2.  Sign in with your Google account
+3.  Click "Create API Key"
+4.  Copy the key and add it to your `.env` file
 
-## Deployment on Netlify
+## Content Management
 
-The application is optimized for Netlify deployment:
+### AI Context Files
 
-1. **Connect Repository**
-   - Go to Netlify dashboard
-   - Click "New site from Git"
-   - Connect your repository
+This application uses markdown files in the `context/` directory to provide contextual information to the AI chat.
 
-2. **Build Settings**
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-   - Node version: 18 or higher
+- **How it Works**: The AI will automatically search and include relevant information from these files based on user questions.
+- **How to Add**: Create `.md` files in the `context/` directory. Use descriptive filenames (e.g., `soft-belief.md`) and clear headings within the files for best results.
 
-3. **Environment Variables**
-   - Add `VITE_GEMINI_API_KEY` in Netlify dashboard under Site settings > Environment variables
+### Audio Summary
 
-4. **Deploy**
-   - Push to your main branch to trigger automatic deployment
-   - Monitor deployment logs for any issues
+1.  **Add Audio File**: Place your `book-summary.wav` file in the `public/audio/` directory.
+2.  **Update Transcript**: Edit the transcript in `src/components/AudioSummary.tsx` to match your audio.
+3.  **Recommended Tools**: You can use tools like NotebookLM, ElevenLabs, or OpenAI TTS to generate audio from your summaries.
+
+### Network Visualization Data
+
+The network visualizations are powered by static data in `src/lib/networkDiagramData.ts`. You can customize the graphs by editing this file to add or modify nodes and relationships.
 
 ## Development
 
-### Key Components
-
-- **AudioSummary**: Custom audio player with transcript display
-- **NetworkVisualization**: Interactive 3D force-directed graph with improved stability
-- **NetworkVisualization2D**: Interactive 2D force-directed graph with improved stability
-- **ChatInterface**: AI-powered discussion with context awareness
-
-### Adding Content
-
-1. **Audio Summary**: Use NotebookLM or similar tools to generate audio, then update the transcript
-2. **Network Data**: Modify `networkDiagramData.ts` to add new concepts and relationships
-3. **Context Files**: Add markdown files to enhance AI responses
-
-### Local Development
-
 ```bash
-# Install dependencies
-npm install
-
 # Start development server
 npm run dev
 
 # Build for production
 npm run build
 
-# Preview production build
+# Preview the build
 npm run preview
 ```
 
-## Technologies Used
+## Deployment on Netlify
 
-- **Vite**: Fast build tool and development server
-- **TypeScript**: Type-safe JavaScript
-- **React**: UI framework
-- **Shadcn/ui**: Modern UI component library
-- **Tailwind CSS**: Utility-first CSS framework
-- **React Force Graph**: Interactive network visualizations
-- **Google Gemini API**: AI-powered chat functionality
+The application is optimized for Netlify deployment:
+
+1.  **Connect Repository**: In your Netlify dashboard, select "New site from Git" and connect your repository.
+2.  **Build Settings**:
+    -   Build command: `npm run build`
+    -   Publish directory: `dist`
+3.  **Environment Variables**: Add `VITE_GEMINI_API_KEY` in your site settings.
+4.  **Deploy**: Push to your main branch to trigger automatic deployment.
+
+## Troubleshooting
+
+-   **Gemini API Key Error**: Ensure your API key is correct, has the proper permissions, and that the environment variable in your `.env` file is prefixed with `VITE_`.
+-   **Audio Not Playing**: Check that your `.wav` file is in the `public/audio/` directory and that there are no errors in the browser console.
+-   **Network Visualization Issues**: Make sure all dependencies are installed (`npm install`) and that your browser supports WebGL for the 3D visualization.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+1.  Fork the repository
+2.  Create a feature branch (`git checkout -b feature/amazing-feature`)
+3.  Make your changes
+4.  Commit your changes (`git commit -m 'Add amazing feature'`)
+5.  Push to the branch (`git push origin feature/amazing-feature`)
+6.  Open a Pull Request
 
 ## License
 
