@@ -77,7 +77,7 @@ const AudioSummary = () => {
               </div>
             </div>
             <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-              ~9 min
+              ~11 min
             </Badge>
           </div>
         </CardHeader>
