@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/62666553-8db6-4952-bb62-20ac5fce261a/deploy-status)](https://app.netlify.com/projects/tech-republic/deploys)
+
 # The Technological Republic - Interactive Explorer
 
 An interactive web application for exploring "The Technological Republic" by Alex Karp, featuring AI-powered discussion, network visualizations, and multimedia content.
