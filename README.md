@@ -62,7 +62,7 @@ npm install
 
 ```bash
 # Copy the example environment file
-cp .env.example .env
+cp env.example .env
 
 # Edit .env and add your Gemini API key
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
@@ -74,6 +74,18 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 2.  Sign in with your Google account
 3.  Click "Create API Key"
 4.  Copy the key and add it to your `.env` file
+
+**Important for Netlify Deployment:**
+
+The AI discussion feature requires the `VITE_GEMINI_API_KEY` environment variable to be set in your Netlify site settings:
+
+1. Go to your Netlify dashboard
+2. Select your site
+3. Go to **Site settings** → **Environment variables**
+4. Add a new variable:
+   - **Key**: `VITE_GEMINI_API_KEY`
+   - **Value**: Your Gemini API key
+5. Save and redeploy your site
 
 ## Content Management
 
@@ -120,6 +132,7 @@ The application is optimized for Netlify deployment:
 
 ## Troubleshooting
 
+-   **AI Discussion Not Working on Netlify**: This is usually due to missing environment variables. Make sure to add `VITE_GEMINI_API_KEY` in your Netlify site settings under **Site settings** → **Environment variables**.
 -   **Gemini API Key Error**: Ensure your API key is correct, has the proper permissions, and that the environment variable in your `.env` file is prefixed with `VITE_`.
 -   **Audio Not Playing**: Check that your `.wav` file is in the `public/audio/` directory and that there are no errors in the browser console.
 -   **Network Visualization Issues**: Make sure all dependencies are installed (`npm install`) and that your browser supports WebGL for the 3D visualization.

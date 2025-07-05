@@ -1,6 +1,4 @@
-// Context loader for markdown files with embeddings support
-import fs from 'fs';
-import path from 'path';
+// Context loader for markdown files with client-side support
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface ContextFile {
@@ -24,38 +22,139 @@ const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 // Simple in-memory cache for embeddings
 let embeddingCache: EmbeddingCache = {};
 
-// Dynamic context loading from /context directory
-async function loadContextFiles(): Promise<ContextFile[]> {
-  try {
-    const contextDir = path.join(process.cwd(), 'context');
-    const files = fs.readdirSync(contextDir);
-    
-    const contextFiles: ContextFile[] = [];
-    
-    for (const file of files) {
-      // Skip README.md and non-markdown files
-      if (file === 'README.md' || !file.endsWith('.md')) {
-        continue;
-      }
-      
-      const filePath = path.join(contextDir, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const stats = fs.statSync(filePath);
-      
-      contextFiles.push({
-        filename: file,
-        content: content,
-        lastModified: stats.mtime.getTime()
-      });
-    }
-    
-    console.log(`Loaded ${contextFiles.length} context files:`, contextFiles.map(f => f.filename));
-    return contextFiles;
-  } catch (error) {
-    console.error('Error loading context files:', error);
-    return [];
+// Pre-loaded context files for client-side use
+const contextFiles: ContextFile[] = [
+  {
+    filename: 'key-themes.md',
+    content: `# Key Themes from "The Technological Republic"
+
+## Technological Power and Democracy
+- The West faces unprecedented challenges from technological competitors
+- Traditional democratic institutions struggle to adapt to rapid technological change
+- The need for a new framework that balances innovation with democratic values
+
+## Soft Belief vs Hard Power
+- "Soft belief" refers to the West's reliance on ideological and moral authority
+- Contrasts with "hard power" approaches used by authoritarian regimes
+- The West must develop new forms of technological power while maintaining democratic principles
+
+## Data and Geopolitics
+- Data has become a critical strategic resource
+- Control of data infrastructure shapes global power dynamics
+- The West must develop competitive data strategies
+
+## Innovation and Competition
+- The importance of maintaining technological leadership
+- Balancing open innovation with strategic interests
+- The role of private sector in national security
+
+## Democratic Adaptation
+- How democratic societies can adapt to technological change
+- The need for new governance models
+- Preserving democratic values in the digital age`,
+    lastModified: Date.now()
+  },
+  {
+    filename: 'rough_notes.md',
+    content: `# Rough Notes on "The Technological Republic"
+
+## Main Arguments
+- The West is losing its technological edge to authoritarian competitors
+- Democratic institutions are ill-equipped for the pace of technological change
+- A new framework is needed that combines innovation with democratic values
+
+## Key Concepts
+- **Technological Republic**: A new form of governance that leverages technology for democratic ends
+- **Soft Belief**: The West's reliance on ideological authority rather than technological power
+- **Hard Power**: Direct technological and military capabilities used by authoritarian regimes
+
+## Challenges Identified
+1. **Pace of Change**: Technology evolves faster than democratic institutions can adapt
+2. **Competition**: Authoritarian regimes can move faster and take more risks
+3. **Values**: Balancing innovation with democratic principles and human rights
+4. **Coordination**: Fragmented approach to technological development in the West
+
+## Proposed Solutions
+- Develop new governance models that can adapt to rapid change
+- Invest in strategic technologies while maintaining democratic oversight
+- Create frameworks for public-private cooperation in national security
+- Build technological capabilities that serve democratic values`,
+    lastModified: Date.now()
+  },
+  {
+    filename: 'hard-power_soft-power.md',
+    content: `# Hard Power vs Soft Power in "The Technological Republic"
+
+## Soft Power (Soft Belief)
+- **Definition**: The West's reliance on ideological, moral, and cultural authority
+- **Characteristics**:
+  - Based on attraction and persuasion rather than coercion
+  - Relies on shared values and democratic principles
+  - Emphasizes international cooperation and multilateralism
+- **Limitations**:
+  - Less effective against authoritarian regimes that don't share these values
+  - Slow to adapt to rapid technological change
+  - Vulnerable to technological disruption
+
+## Hard Power
+- **Definition**: Direct technological, economic, and military capabilities
+- **Characteristics**:
+  - Based on tangible capabilities and force
+  - Can be deployed rapidly and decisively
+  - Effective against immediate threats
+- **Examples in the book**:
+  - China's technological development programs
+  - Russia's cyber capabilities
+  - Authoritarian regimes' ability to move quickly on technology
+
+## The Challenge
+The West has traditionally relied on soft power but now faces competitors who combine soft and hard power approaches. The book argues that the West needs to develop new forms of technological power while maintaining its democratic values.
+
+## The Solution
+A "Technological Republic" that:
+- Develops hard technological capabilities
+- Maintains democratic oversight and values
+- Creates new governance models for rapid adaptation
+- Balances innovation with ethical considerations`,
+    lastModified: Date.now()
+  },
+  {
+    filename: 'wall_st_journal_article.md',
+    content: `# Wall Street Journal Article on Alex Karp
+
+## Key Points from the Article
+
+### Karp's Background and Philosophy
+- CEO of Palantir Technologies
+- Strong advocate for American technological leadership
+- Believes in the importance of maintaining competitive advantage
+
+### Views on AI and Competition
+- AI systems will raise the floor of capabilities significantly
+- Forces everyone to "do something unique, creative"
+- Uses jazz metaphor of finding one's distinctive "blue note"
+- Compares to long-range shooting: operating "outside the range of what a human can do"
+
+### Support for Israel
+- Unapologetic support for Israel and doing business with its government
+- Acknowledges the risks for a publicly traded company
+- Believes in taking principled stands even when controversial
+
+### Business Philosophy
+- Emphasizes the importance of hitting targets
+- Believes value comes from operating beyond human capabilities
+- Combines technological innovation with strategic thinking
+
+### Response to October 7th Attack
+- Coordinated efforts to help Israel after the attack
+- Noted the rapid emergence of anti-Israel protests
+- Demonstrates his commitment to action over rhetoric
+
+## Relevance to "The Technological Republic"
+This article shows Karp's practical application of the principles he discusses in his book - combining technological capability with strategic thinking and taking principled stands in the face of global challenges.`,
+    lastModified: Date.now()
   }
-}
+];
 
 // Generate embeddings for content using Google GenAI
 async function generateEmbedding(text: string): Promise<number[]> {
@@ -156,10 +255,7 @@ function calculateKeywordRelevance(userQuery: string, content: string): number {
 
 // Get relevant context for a user query
 export async function getRelevantContext(userQuery: string, maxContext: number = 2000): Promise<string> {
-  // Load context files dynamically
-  const contextFiles = await loadContextFiles();
-  
-  // Get embeddings for all context files
+  // Use pre-loaded context files
   const filesWithEmbeddings = await getContextEmbeddings(contextFiles);
   
   // Calculate semantic relevance
