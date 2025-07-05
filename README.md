@@ -64,8 +64,9 @@ npm install
 # Copy the example environment file
 cp env.example .env
 
-# Edit .env and add your Gemini API key
+# Edit .env and add your API keys
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
+VITE_NEON_DATABASE_URL=your_neon_database_url_here
 ```
 
 **Getting a Gemini API Key:**
@@ -77,21 +78,56 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 
 **Important for Netlify Deployment:**
 
-The AI discussion feature requires the `VITE_GEMINI_API_KEY` environment variable to be set in your Netlify site settings:
+The AI discussion feature requires environment variables to be set in your Netlify site settings:
 
 1. Go to your Netlify dashboard
 2. Select your site
 3. Go to **Site settings** → **Environment variables**
-4. Add a new variable:
+4. Add the following variables:
    - **Key**: `VITE_GEMINI_API_KEY`
    - **Value**: Your Gemini API key
+   - **Key**: `DATABASE_URL` (for serverless functions)
+   - **Value**: Your Neon database connection string
 5. Save and redeploy your site
 
 ## Content Management
 
-### AI Context Files
+### Neon Database Integration (Recommended)
 
-This application uses markdown files in the `context/` directory to provide contextual information to the AI chat.
+This application now supports Neon database integration for enhanced AI context retrieval. The system uses vector embeddings to provide more accurate and relevant responses.
+
+#### Setup Instructions
+
+1. **Create Neon Database**:
+   - Go to [neon.tech](https://neon.tech) and create an account
+   - Create a new project
+   - Copy your connection string
+
+2. **Upload Context to Database**:
+   ```bash
+   cd scripts
+   # Install Python dependencies
+   uv sync
+   # Run the chunk and upload script
+   uv run python chunk_and_upload.py
+   ```
+
+3. **Environment Variables**:
+   - Add `DATABASE_URL` to your `.env` file (for Python scripts and Netlify Functions)
+   - Add `VITE_NEON_DATABASE_URL` to your `.env` file (for client-side, optional)
+   - Add `DATABASE_URL` to Netlify environment variables (for serverless functions)
+
+#### How It Works
+
+- **Vector Embeddings**: Content is converted to numerical vectors using Google's Gemini embedding model
+- **Semantic Search**: User queries are matched to relevant content using cosine similarity
+- **Real-time Retrieval**: The system fetches the most relevant chunks from the database using Neon's serverless driver
+- **Caching**: Query embeddings are cached for performance
+- **Best Practices**: Uses official Neon serverless driver for optimal Netlify Functions performance
+
+### Legacy: AI Context Files
+
+This application can also use markdown files in the `context/` directory to provide contextual information to the AI chat.
 
 - **How it Works**: The AI will automatically search and include relevant information from these files based on user questions.
 - **How to Add**: Create `.md` files in the `context/` directory. Use descriptive filenames (e.g., `soft-belief.md`) and clear headings within the files for best results.
@@ -130,11 +166,67 @@ CREATE TABLE document_chunks (
 CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops);
 ```
 
-**Alternative Vector Databases:**
-- **Pinecone**: Managed vector database with excellent performance
-- **Weaviate**: Open-source vector database with GraphQL API
-- **Qdrant**: High-performance vector database with filtering
-- **Chroma**: Lightweight, embeddable vector database
+**Open Source Vector Database Alternatives:**
+
+**Self-Hosted Options:**
+- **Qdrant**: High-performance vector database written in Rust, excellent for production
+- **Weaviate**: Open-source vector database with GraphQL API and semantic search
+- **Chroma**: Lightweight, embeddable vector database perfect for development
+- **Milvus**: Scalable vector database designed for AI applications
+- **Vespa**: Yahoo's open-source search engine with vector search capabilities
+- **PostgreSQL + pgvector**: Add vector search to existing PostgreSQL databases
+- **Redis + RedisSearch**: Use Redis with vector search modules
+
+**Managed Open Source:**
+- **Neon**: Serverless PostgreSQL with pgvector support (recommended for easy setup)
+- **Supabase**: Open-source Firebase alternative with PostgreSQL and pgvector
+- **Railway**: Easy deployment of open-source databases
+
+**Lightweight Options:**
+- **LanceDB**: Embeddable vector database with Python/JavaScript APIs
+- **Hnswlib**: Fast approximate nearest neighbor search library
+- **FAISS**: Facebook's library for efficient similarity search
+
+#### Quick Setup with Neon (Recommended)
+
+**Step 1: Create Neon Database**
+1. Go to [neon.tech](https://neon.tech) and sign up
+2. Create a new project
+3. Copy your connection string (looks like: `postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname`)
+
+**Step 2: Enable pgvector Extension**
+```sql
+-- Run this in your Neon SQL editor
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+**Step 3: Create Your Tables**
+```sql
+-- Create the document chunks table
+CREATE TABLE document_chunks (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding vector(768), -- Adjust dimension based on your embedding model
+    metadata JSONB DEFAULT '{}',
+    source_file VARCHAR(255),
+    chunk_index INTEGER,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create an index for similarity search
+CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops);
+```
+
+**Step 4: Add Environment Variable**
+```bash
+# Add to your .env file
+NEON_DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname
+```
+
+**Step 5: Install Dependencies**
+```bash
+npm install pg @types/pg
+```
 
 #### Integration Steps
 
@@ -143,10 +235,11 @@ CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops);
 3. **Store in Database**: Insert chunks with their embeddings and metadata
 4. **Update Retrieval Logic**: Replace the current context loading with database queries
 
-#### Example Implementation
+#### Example Implementations
 
+**TimescaleDB/PostgreSQL + pgvector:**
 ```typescript
-// Enhanced context loader with vector database
+// Enhanced context loader with PostgreSQL + pgvector
 export async function getRelevantContextFromDB(userQuery: string): Promise<string> {
   const queryEmbedding = await generateEmbedding(userQuery);
   
@@ -164,12 +257,121 @@ export async function getRelevantContextFromDB(userQuery: string): Promise<strin
 }
 ```
 
+**Qdrant (Recommended for Production):**
+```typescript
+import { QdrantClient } from '@qdrant/js-client-rest';
+
+const client = new QdrantClient({ url: 'http://localhost:6333' });
+
+export async function getRelevantContextFromQdrant(userQuery: string): Promise<string> {
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  const searchResult = await client.search('document_chunks', {
+    vector: queryEmbedding,
+    limit: 5,
+    score_threshold: 0.7
+  });
+  
+  return searchResult.map(result => result.payload.content).join('\n\n');
+}
+```
+
+**Chroma (Great for Development):**
+```typescript
+import { ChromaClient } from 'chromadb';
+
+const client = new ChromaClient();
+const collection = client.getCollection('document_chunks');
+
+export async function getRelevantContextFromChroma(userQuery: string): Promise<string> {
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  const results = await collection.query({
+    queryEmbeddings: [queryEmbedding],
+    nResults: 5
+  });
+  
+  return results.documents[0].join('\n\n');
+}
+```
+
+**Neon (Serverless PostgreSQL):**
+```typescript
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.NEON_DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+export async function getRelevantContextFromNeon(userQuery: string): Promise<string> {
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  const result = await pool.query(`
+    SELECT content, metadata, 
+           1 - (embedding <=> $1) as similarity
+    FROM document_chunks 
+    WHERE 1 - (embedding <=> $1) > 0.7
+    ORDER BY embedding <=> $1
+    LIMIT 5
+  `, [queryEmbedding]);
+  
+  return result.rows.map(row => row.content).join('\n\n');
+}
+```
+
+**Supabase (Managed PostgreSQL):**
+```typescript
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+
+export async function getRelevantContextFromSupabase(userQuery: string): Promise<string> {
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  const { data, error } = await supabase.rpc('match_documents', {
+    query_embedding: queryEmbedding,
+    match_threshold: 0.7,
+    match_count: 5
+  });
+  
+  if (error) throw error;
+  return data.map((doc: any) => doc.content).join('\n\n');
+}
+```
+
 #### Benefits for This Project
 
 - **Better Context Retrieval**: More precise matching of user questions to relevant book content
 - **Dynamic Content**: Easily add new chapters, articles, or notes without code changes
 - **Performance**: Faster retrieval for large document collections
 - **Analytics**: Track which content is most relevant to user queries
+
+#### Open Source Comparison
+
+| Database | Ease of Setup | Performance | Scalability | Best For |
+|----------|---------------|-------------|-------------|----------|
+| **Chroma** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | Development, prototyping |
+| **Qdrant** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Production, high performance |
+| **Weaviate** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | GraphQL APIs, semantic search |
+| **PostgreSQL + pgvector** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Existing PostgreSQL users |
+| **Supabase** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Managed solution, easy deployment |
+| **Milvus** | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Large-scale AI applications |
+
+#### Quick Start Recommendations
+
+**For Development/Prototyping:**
+- **Neon**: Serverless PostgreSQL with pgvector, easiest managed option
+- **Chroma**: Easiest to set up locally, great for learning
+- **Supabase**: Managed PostgreSQL with pgvector, no server management
+
+**For Production:**
+- **Qdrant**: Best performance, excellent documentation
+- **PostgreSQL + pgvector**: If you already use PostgreSQL
+
+**For Large Scale:**
+- **Milvus**: Designed for massive vector datasets
+- **Weaviate**: If you need GraphQL and semantic search
 
 #### Migration Path
 
