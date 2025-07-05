@@ -96,6 +96,88 @@ This application uses markdown files in the `context/` directory to provide cont
 - **How it Works**: The AI will automatically search and include relevant information from these files based on user questions.
 - **How to Add**: Create `.md` files in the `context/` directory. Use descriptive filenames (e.g., `soft-belief.md`) and clear headings within the files for best results.
 
+### Advanced RAG with Embedding Database (Optional)
+
+For production applications requiring more sophisticated retrieval capabilities, consider implementing a vector database like TimescaleDB with pgvector:
+
+#### Why Use an Embedding Database?
+
+- **Better Semantic Search**: Vector similarity search is more accurate than keyword matching
+- **Scalability**: Handle thousands of documents efficiently
+- **Real-time Updates**: Add new content without rebuilding the entire context
+- **Metadata Filtering**: Filter by source, date, topic, etc.
+- **Hybrid Search**: Combine semantic and keyword search for better results
+
+#### Implementation Options
+
+**TimescaleDB + pgvector:**
+```sql
+-- Create the vector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Create a table for document chunks
+CREATE TABLE document_chunks (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding vector(768), -- Adjust dimension based on your embedding model
+    metadata JSONB,
+    source_file VARCHAR(255),
+    chunk_index INTEGER,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create an index for similarity search
+CREATE INDEX ON document_chunks USING ivfflat (embedding vector_cosine_ops);
+```
+
+**Alternative Vector Databases:**
+- **Pinecone**: Managed vector database with excellent performance
+- **Weaviate**: Open-source vector database with GraphQL API
+- **Qdrant**: High-performance vector database with filtering
+- **Chroma**: Lightweight, embeddable vector database
+
+#### Integration Steps
+
+1. **Chunk Your Documents**: Split markdown files into smaller, meaningful chunks
+2. **Generate Embeddings**: Use the same embedding model (gemini-embedding-exp-03-07) for consistency
+3. **Store in Database**: Insert chunks with their embeddings and metadata
+4. **Update Retrieval Logic**: Replace the current context loading with database queries
+
+#### Example Implementation
+
+```typescript
+// Enhanced context loader with vector database
+export async function getRelevantContextFromDB(userQuery: string): Promise<string> {
+  const queryEmbedding = await generateEmbedding(userQuery);
+  
+  // Query the database for similar chunks
+  const similarChunks = await db.query(`
+    SELECT content, metadata, 
+           1 - (embedding <=> $1) as similarity
+    FROM document_chunks 
+    WHERE 1 - (embedding <=> $1) > 0.7
+    ORDER BY embedding <=> $1
+    LIMIT 5
+  `, [queryEmbedding]);
+  
+  return similarChunks.map(chunk => chunk.content).join('\n\n');
+}
+```
+
+#### Benefits for This Project
+
+- **Better Context Retrieval**: More precise matching of user questions to relevant book content
+- **Dynamic Content**: Easily add new chapters, articles, or notes without code changes
+- **Performance**: Faster retrieval for large document collections
+- **Analytics**: Track which content is most relevant to user queries
+
+#### Migration Path
+
+1. Start with the current file-based approach
+2. Add vector database as an optional enhancement
+3. Gradually migrate content to the database
+4. A/B test retrieval quality improvements
+
 ### Audio Summary
 
 1.  **Add Audio File**: Place your `book-summary.wav` file in the `public/audio/` directory.
