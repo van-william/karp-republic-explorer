@@ -113,17 +113,21 @@ class DocumentChunker:
 class NeonUploader:
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
+        # Database connection parameters
+        self.db_params = {
+            'connect_timeout': 30,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5
+        }
+    
+    def _get_connection(self):
+        """Get database connection with consistent parameters."""
+        return psycopg2.connect(self.connection_string, **self.db_params)
     
     def create_tables(self):
         """Create the necessary tables in Neon."""
-        with psycopg2.connect(
-            self.connection_string, 
-            sslmode='require', 
-            connect_timeout=30,
-            keepalives_idle=30,
-            keepalives_interval=10,
-            keepalives_count=5
-        ) as conn:
+        with self._get_connection() as conn:
             with conn.cursor() as cur:
                 # Enable pgvector extension
                 cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
@@ -161,16 +165,13 @@ class NeonUploader:
                     content=text
                 )
                 
-                # Handle the response structure
-                embedding = None
+                # Extract embedding from response
                 if hasattr(result, 'embedding'):
-                    embedding = result.embedding
+                    return result.embedding
                 elif hasattr(result, 'embeddings') and result.embeddings:
-                    embedding = result.embeddings[0].values
+                    return result.embeddings[0].values
                 else:
-                    embedding = result['embedding']
-                
-                return embedding
+                    return result['embedding']
             except Exception as e:
                 if ("429" in str(e) or "504" in str(e)) and attempt < max_retries - 1:
                     wait_time = (2 ** attempt) * 2  # Exponential backoff: 2s, 4s, 8s
@@ -184,14 +185,7 @@ class NeonUploader:
     
     def upload_chunks(self, chunks: List[Dict[str, Any]]):
         """Upload chunks with embeddings to Neon."""
-        with psycopg2.connect(
-            self.connection_string, 
-            sslmode='require', 
-            connect_timeout=30,
-            keepalives_idle=30,
-            keepalives_interval=10,
-            keepalives_count=5
-        ) as conn:
+        with self._get_connection() as conn:
             with conn.cursor() as cur:
                 # Group chunks by source file
                 chunks_by_file = {}
@@ -204,21 +198,21 @@ class NeonUploader:
                 total_uploaded = 0
                 
                 for filename, file_chunks in chunks_by_file.items():
-                    print(f"📄 Processing {filename}...")
+                    print(f"📄 Processing {filename} ({len(file_chunks)} chunks)...")
                     
                     # Clear existing chunks for this file to avoid duplicates
                     cur.execute("DELETE FROM document_chunks WHERE source_file = %s", (filename,))
                     print(f"   → Cleared existing chunks for {filename}")
                     
-                    for chunk in file_chunks:
+                    for i, chunk in enumerate(file_chunks, 1):
+                        print(f"   → Processing chunk {i}/{len(file_chunks)}", end="\r")
                         # Generate embedding
                         embedding = self.generate_embedding(chunk['content'])
                         if not embedding:
                             print(f"⚠️  Skipping chunk {chunk['chunk_index']} from {chunk['filename']} - embedding failed")
                             continue
                         
-                        # Small delay to avoid rate limiting and timeouts
-                        time.sleep(0.5)
+                        # No delay needed - retry logic handles rate limiting
                         
                         # Insert into database
                         cur.execute("""
@@ -233,10 +227,7 @@ class NeonUploader:
                         ))
                         total_uploaded += 1
                     
-                    print(f"   → Uploaded {len(file_chunks)} chunks for {filename}")
-                    
-                    # Longer delay between files to avoid timeouts
-                    time.sleep(2)
+                    print(f"\n   → Uploaded {len(file_chunks)} chunks for {filename}")
                 
                 conn.commit()
                 print(f"✅ Uploaded {total_uploaded} total chunks to Neon")
@@ -251,15 +242,10 @@ def main():
     neon_url = os.getenv('DATABASE_URL') or os.getenv('NEON_DATABASE_URL')
     if not neon_url:
         print("❌ DATABASE_URL or NEON_DATABASE_URL not found in environment variables")
-        print("Please add DATABASE_URL to your .env file or set it as an environment variable")
+        print("Please add one of these to your .env file:")
+        print("  DATABASE_URL=postgresql://user:pass@host/db?sslmode=require")
+        print("  NEON_DATABASE_URL=postgresql://user:pass@host/db?sslmode=require")
         return
-    
-    # Ensure the connection string has the right format
-    if 'sslmode=require' not in neon_url:
-        if '?' in neon_url:
-            neon_url += '&sslmode=require'
-        else:
-            neon_url += '?sslmode=require'
     
     # Initialize components
     chunker = DocumentChunker(chunk_size=chunk_size, overlap=overlap)
