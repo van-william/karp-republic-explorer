@@ -12,7 +12,7 @@ import tiktoken
 from pathlib import Path
 from typing import List, Dict, Any
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
 # Load environment variables from parent directory
 load_dotenv('../.env')
@@ -24,7 +24,7 @@ if not api_key:
     print("Please add it to your .env file or set it as an environment variable")
     exit(1)
 
-genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
 class DocumentChunker:
     def __init__(self, chunk_size: int = 1000, overlap: int = 200):
@@ -160,18 +160,13 @@ class NeonUploader:
         """Generate embedding using Google's text-embedding-004 model with retry logic."""
         for attempt in range(max_retries):
             try:
-                result = genai.embed_content(
+                result = client.models.embed_content(
                     model="text-embedding-004",
-                    content=text
+                    contents=text
                 )
                 
                 # Extract embedding from response
-                if hasattr(result, 'embedding'):
-                    return result.embedding
-                elif hasattr(result, 'embeddings') and result.embeddings:
-                    return result.embeddings[0].values
-                else:
-                    return result['embedding']
+                return result.embeddings[0].values
             except Exception as e:
                 if ("429" in str(e) or "504" in str(e)) and attempt < max_retries - 1:
                     wait_time = (2 ** attempt) * 2  # Exponential backoff: 2s, 4s, 8s
